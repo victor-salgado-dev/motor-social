@@ -6,19 +6,11 @@ PG_BIN="$(pg_config --bindir)"
 DB_HOST="127.0.0.1"
 DB_PORT="5432"
 DB_USER="${DB_USER:-admin}"
-DB_PASSWORD="${DB_PASSWORD:-}"
+DB_PASSWORD="${DB_PASSWORD:-motor-social-demo-db}"
 DB_NAME="${DB_NAME:-motor_social_db}"
+JWT_SECRET="${JWT_SECRET:-motor-social-demo-jwt-secret}"
 
-if [ -z "$DB_PASSWORD" ]; then
-    echo "FATAL: configura DB_PASSWORD en las variables de entorno de Render."
-    exit 1
-fi
-if [ -z "${JWT_SECRET:-}" ]; then
-    echo "FATAL: configura JWT_SECRET en las variables de entorno de Render."
-    exit 1
-fi
-
-export PGDATA DB_HOST DB_PORT DB_USER DB_PASSWORD DB_NAME
+export PGDATA DB_HOST DB_PORT DB_USER DB_PASSWORD DB_NAME JWT_SECRET
 mkdir -p "$PGDATA"
 chown -R postgres:postgres "$PGDATA"
 

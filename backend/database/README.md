@@ -29,14 +29,7 @@ docker compose up -d --build
 
 Render debe crear un servicio **Web Service** usando el `Dockerfile` de la raíz del repositorio. La imagen inicia PostgreSQL en `127.0.0.1`, aplica las migraciones y ejecuta `db:seed` antes de iniciar Express. `DB_HOST` y `DB_PORT` se fuerzan a esos valores locales; no copies `DB_HOST=motor-db` de `.env` a Render.
 
-Configura estas variables en el servicio:
-
-- `DB_USER=admin`
-- `DB_PASSWORD`: una contraseña propia y segura
-- `DB_NAME=motor_social_db`
-- `JWT_SECRET`: una clave aleatoria larga
-
-Añade un **Persistent Disk** montado en `/var/lib/postgresql/data`. Sin ese disco, Render puede eliminar la base de datos al reemplazar el contenedor. El puerto web se obtiene de `PORT`, proporcionado por Render.
+No hace falta configurar variables ni añadir un **Persistent Disk**. El contenedor usa valores demo por defecto para PostgreSQL y JWT, y Render proporciona `PORT`. Sin disco persistente, los datos son efímeros y pueden perderse cuando Render reinicie o reemplace la instancia; el tiempo exacto no está garantizado por la aplicación. Al arrancar con una base vacía se vuelven a aplicar las migraciones y se insertan los 3 usuarios y 3 coches de demo (contraseña `demo1234`).
 
 ## Añadir una migración nueva (en fases futuras)
 
