@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import ConfirmModal from '../components/ConfirmModal';
 import Avatar from '../components/Avatar';
+import { fallbackImagen, imagenCocheDemo, resolverImagen } from '../utils/imagen';
 import { ArrowLeft, Heart, Send, Pencil, Trash2, CarFront } from 'lucide-react';
 
 export default function PostDetail() {
@@ -118,7 +119,12 @@ export default function PostDetail() {
 
                     {post.texto && <p className="px-4 pb-4 text-zinc-200 text-sm whitespace-pre-wrap">{post.texto}</p>}
                     {post.imagen_url && (
-                        <img src={`${import.meta.env.VITE_API_URL}${post.imagen_url}`} alt="" className="w-full max-h-[600px] object-cover" />
+                        <img
+                            src={resolverImagen(post.imagen_url)}
+                            alt=""
+                            className="w-full max-h-[600px] object-cover"
+                            onError={(event) => fallbackImagen(event, imagenCocheDemo(post.id))}
+                        />
                     )}
 
                     <div className="p-4">

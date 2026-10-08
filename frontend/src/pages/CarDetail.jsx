@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import ConfirmModal from '../components/ConfirmModal';
 import { getImagenCoche } from '../utils/coche';
+import { fallbackImagen } from '../utils/imagen';
 import { ArrowLeft, Heart, Send, Pencil, Trash2, Plus, X, Gauge, MapPin, Palette } from 'lucide-react';
 
 // No existe todavía un GET /coches/:id en el backend (solo el listado
@@ -157,7 +158,12 @@ export default function CarDetail() {
                 <div className="bg-zinc-900 rounded-3xl overflow-hidden border border-white/10 flex flex-col md:flex-row">
                     <div className="md:flex-[1.5] flex flex-col">
                         <div className="bg-black flex items-center justify-center p-4 max-h-[50vh] md:max-h-[65vh]">
-                            <img src={urlImagenGrande} className="max-h-full max-w-full object-contain rounded-xl" alt={coche.modelo} />
+                            <img
+                                src={urlImagenGrande}
+                                className="max-h-full max-w-full object-contain rounded-xl"
+                                alt={coche.modelo}
+                                onError={(event) => fallbackImagen(event, getImagenCoche(null, coche.id, coche.marca))}
+                            />
                         </div>
 
                         {/* Galería: foto principal + fotos adicionales */}
@@ -166,7 +172,12 @@ export default function CarDetail() {
                                 onClick={() => setImagenActiva(null)}
                                 className={`w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 ${imagenActiva === null ? 'border-red-600' : 'border-transparent opacity-60'}`}
                             >
-                                <img src={getImagenCoche(coche.foto_url, coche.id, coche.marca)} className="w-full h-full object-cover" alt="Principal" />
+                                <img
+                                    src={getImagenCoche(coche.foto_url, coche.id, coche.marca)}
+                                    className="w-full h-full object-cover"
+                                    alt="Principal"
+                                    onError={(event) => fallbackImagen(event, getImagenCoche(null, coche.id, coche.marca))}
+                                />
                             </button>
                             {fotos.map(f => (
                                 <div key={f.id} className="relative shrink-0 group">
@@ -174,7 +185,12 @@ export default function CarDetail() {
                                         onClick={() => setImagenActiva(f.id)}
                                         className={`w-16 h-16 rounded-lg overflow-hidden border-2 ${imagenActiva === f.id ? 'border-red-600' : 'border-transparent opacity-60'}`}
                                     >
-                                        <img src={getImagenCoche(f.foto_url, coche.id, coche.marca)} className="w-full h-full object-cover" alt="" />
+                                        <img
+                                            src={getImagenCoche(f.foto_url, coche.id, coche.marca)}
+                                            className="w-full h-full object-cover"
+                                            alt=""
+                                            onError={(event) => fallbackImagen(event, getImagenCoche(null, coche.id, coche.marca))}
+                                        />
                                     </button>
                                     {esPropietario && (
                                         <button

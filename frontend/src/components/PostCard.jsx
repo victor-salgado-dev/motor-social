@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, MessageCircle, CarFront } from 'lucide-react';
 import Avatar from './Avatar';
+import { fallbackImagen, imagenCocheDemo, resolverImagen } from '../utils/imagen';
 
 function tiempoRelativo(fecha) {
     const segundos = Math.floor((new Date() - new Date(fecha)) / 1000);
@@ -49,9 +50,10 @@ export default function PostCard({ post, onLike }) {
             {post.imagen_url && (
                 <img
                     onClick={() => navigate(`/publicaciones/${post.id}`)}
-                    src={`${import.meta.env.VITE_API_URL}${post.imagen_url}`}
+                    src={resolverImagen(post.imagen_url)}
                     alt=""
                     className="w-full max-h-[520px] object-cover cursor-pointer"
+                    onError={(event) => fallbackImagen(event, imagenCocheDemo(post.id))}
                 />
             )}
 

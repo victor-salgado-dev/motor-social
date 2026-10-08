@@ -6,7 +6,7 @@ Sistema mínimo, sin dependencias nuevas: usa el mismo `pg` que ya usa el backen
 
 ```
 npm run db:migrate   # aplica las migraciones pendientes (seguro de repetir)
-npm run db:seed      # SOLO en una base de datos vacía: crea 3 usuarios y 3 coches de demo
+npm run db:seed      # crea/actualiza 10 usuarios demo y su actividad social
 ```
 
 ## Cómo funciona
@@ -29,7 +29,7 @@ docker compose up -d --build
 
 Render debe crear un servicio **Web Service** usando el `Dockerfile` de la raíz del repositorio. La imagen inicia PostgreSQL en `127.0.0.1`, aplica las migraciones y ejecuta `db:seed` antes de iniciar Express. `DB_HOST` y `DB_PORT` se fuerzan a esos valores locales; no copies `DB_HOST=motor-db` de `.env` a Render.
 
-No hace falta configurar variables ni añadir un **Persistent Disk**. El contenedor usa valores demo por defecto para PostgreSQL y JWT, y Render proporciona `PORT`. Sin disco persistente, los datos son efímeros y pueden perderse cuando Render reinicie o reemplace la instancia; el tiempo exacto no está garantizado por la aplicación. Al arrancar con una base vacía se vuelven a aplicar las migraciones y se insertan los 3 usuarios y 3 coches de demo (contraseña `demo1234`).
+No hace falta configurar variables ni añadir un **Persistent Disk**. El contenedor usa valores demo por defecto para PostgreSQL y JWT, y Render proporciona `PORT`. Sin disco persistente, los datos son efímeros y pueden perderse cuando Render reinicie o reemplace la instancia; el tiempo exacto no está garantizado por la aplicación. Al arrancar crea 10 cuentas, 10 coches, 20 publicaciones, seguimientos, likes, comentarios y notificaciones (contraseña `demo1234`). Las fotos demo están empaquetadas en `frontend/public/demo`, así que no dependen de un servicio externo al cargarse.
 
 ## Añadir una migración nueva (en fases futuras)
 

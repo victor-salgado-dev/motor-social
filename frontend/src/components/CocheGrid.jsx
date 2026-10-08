@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, User as UserIcon, MessageCircle, Heart } from 'lucide-react';
 import { getImagenCoche } from '../utils/coche';
+import { fallbackImagen } from '../utils/imagen';
 
 // Rejilla de tarjetas de coche, reutilizada por Feed (global y "mi garaje")
 // y por la página de perfil público. onLike es opcional: si no se pasa, el
@@ -28,6 +29,7 @@ export default function CocheGrid({ coches, onLike, ocultarPropietario = false }
                             src={getImagenCoche(car.foto_url, car.id, car.marca)}
                             alt={car.modelo}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={(event) => fallbackImagen(event, getImagenCoche(null, car.id, car.marca))}
                         />
                         <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white uppercase tracking-widest border border-white/10">
                             {car.marca}
