@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogIn, Mail, Lock, Car } from 'lucide-react';
+import { LogIn, Mail, Lock, Car, FlaskConical } from 'lucide-react';
+
+const CUENTA_DEMO = {
+    email: 'demo1@motorsocial.local',
+    password: 'demo1234',
+};
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -12,17 +17,21 @@ export default function Login() {
     const { mostrarToast } = useToast();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const iniciarSesion = async (correo, clave) => {
         setEnviando(true);
         try {
-            await login(email, password);
+            await login(correo, clave);
             navigate('/');
         } catch (err) {
             mostrarToast("Usuario o contraseña incorrectos", "error");
         } finally {
             setEnviando(false);
         }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        await iniciarSesion(email, password);
     };
 
     return (
@@ -69,6 +78,15 @@ export default function Login() {
                         <LogIn size={20} /> {enviando ? "ENTRANDO..." : "ENTRAR AL GARAJE"}
                     </button>
                 </form>
+
+                <button
+                    type="button"
+                    disabled={enviando}
+                    onClick={() => iniciarSesion(CUENTA_DEMO.email, CUENTA_DEMO.password)}
+                    className="w-full mt-4 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800 disabled:opacity-50 text-zinc-200 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition"
+                >
+                    <FlaskConical size={18} /> ENTRAR CON CUENTA DEMO
+                </button>
 
                 <p className="text-center mt-8 text-zinc-500 text-sm">
                     ¿No tienes cuenta? <Link to="/register" className="text-red-500 font-bold hover:underline">Regístrate aquí</Link>
