@@ -1,38 +1,74 @@
-#!/bin/bash
+#!/bin/sh
+set -eu
+
+PGDATA="${PGDATA:-/var/lib/postgresql/data}"
+PG_BIN="$(pg_config --bindir)"
+DB_HOST="127.0.0.1"
+DB_PORT="5432"
+DB_USER="${DB_USER:-admin}"
+DB_PASSWORD="${DB_PASSWORD:-}"
+DB_NAME="${DB_NAME:-motor_social_db}"
+
+if [ -z "$DB_PASSWORD" ]; then
+    echo "FATAL: configura DB_PASSWORD en las variables de entorno de Render."
+    exit 1
+fi
+if [ -z "${JWT_SECRET:-}" ]; then
+    echo "FATAL: configura JWT_SECRET en las variables de entorno de Render."
+    exit 1
+fi
+
+export PGDATA DB_HOST DB_PORT DB_USER DB_PASSWORD DB_NAME
+mkdir -p "$PGDATA"
+chown -R postgres:postgres "$PGDATA"
+
+if [ ! -s "$PGDATA/PG_VERSION" ]; then
+    if [ -n "$(find "$PGDATA" -mindepth 1 -maxdepth 1 -print -quit)" ]; then
+        echo "FATAL: PGDATA no está vacío pero no contiene una base inicializada: $PGDATA"
+        exit 1
+    fi
+    echo ">>> Inicializando PostgreSQL en $PGDATA..."
+    runuser -u postgres -- "$PG_BIN/initdb" -D "$PGDATA" --encoding=UTF8 --locale=C --auth-local=trust --auth-host=scram-sha-256
+fi
+
+echo ">>> Arrancando PostgreSQL..."
+runuser -u postgres -- "$PG_BIN/pg_ctl" -D "$PGDATA" \
+    -o "-h 127.0.0.1 -p $DB_PORT" -w start
+
+apagar() {
+    if [ -n "${APP_PID:-}" ]; then
+        kill -TERM "$APP_PID" 2>/dev/null || true
+        wait "$APP_PID" 2>/dev/null || true
+    fi
+    runuser -u postgres -- "$PG_BIN/pg_ctl" -D "$PGDATA" -m fast -w stop 2>/dev/null || true
+}
+trap apagar EXIT
+trap 'exit 0' INT TERM
+
+echo ">>> Configurando usuario y base de datos..."
+runuser -u postgres -- "$PG_BIN/psql" -v ON_ERROR_STOP=1 -d postgres \
+    --set=db_user="$DB_USER" --set=db_password="$DB_PASSWORD" --set=db_name="$DB_NAME" <<'SQL'
+SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', :'db_user', :'db_password')
+WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'db_user')
+\gexec
+SELECT format('ALTER ROLE %I WITH LOGIN PASSWORD %L', :'db_user', :'db_password')
+\gexec
+SELECT format('CREATE DATABASE %I OWNER %I', :'db_name', :'db_user')
+WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = :'db_name')
+\gexec
+SQL
+
+echo ">>> Aplicando migraciones..."
+npm run db:migrate
+
+echo ">>> Insertando datos de prueba si la base está vacía..."
+npm run db:seed
+
+echo ">>> Arrancando Express en el puerto ${PORT:-3000}..."
+set +e
+"$@" &
+APP_PID=$!
+wait "$APP_PID"
+APP_STATUS=$?
 set -e
-
-echo ">>> Inicializando PostgreSQL..."
-if [ -z "$(ls -A /var/lib/postgresql/data)" ]; then
-    su-exec postgres initdb -D /var/lib/postgresql/data
-fi
-
-echo ">>> Arrancando PostgreSQL en background..."
-su-exec postgres pg_ctl start -D /var/lib/postgresql/data -l /var/lib/postgresql/logfile
-
-# Esperar a que la BBDD esté lista
-until su-exec postgres pg_isready; do sleep 1; done
-
-echo ">>> Configurando BD y usuario..."
-su-exec postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname = 'admin'" | grep -q 1 || \
-    su-exec postgres psql -c "CREATE USER admin WITH SUPERUSER PASSWORD 'password123';"
-
-su-exec postgres psql -tc "SELECT 1 FROM pg_database WHERE datname = 'motor_social_db'" | grep -q 1 || \
-    su-exec postgres psql -c "CREATE DATABASE motor_social_db OWNER admin;"
-
-# Importar las tablas si la base de datos está recién creada
-TABLE_COUNT=$(su-exec postgres psql -d motor_social_db -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';")
-if [ "$TABLE_COUNT" -eq "0" ] && [ -f "/app/schema.sql" ]; then
-    echo ">>> Importando tablas..."
-    su-exec postgres psql -d motor_social_db -f /app/schema.sql
-fi
-
-echo ">>> Arrancando Express Backend..."
-# Forzar las variables locales
-export DB_HOST=127.0.0.1
-export DB_PORT=5432
-export DB_USER=admin
-export DB_PASSWORD=password123
-export DB_NAME=motor_social_db
-export JWT_SECRET=${JWT_SECRET:-"super_secreto_demo_123"}
-
-exec node src/index.js
+exit "$APP_STATUS"

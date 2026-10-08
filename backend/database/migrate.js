@@ -82,7 +82,7 @@ async function main() {
         await ejecutarMigraciones();
         console.log('Migraciones completadas.');
     } catch (err) {
-        console.error('El proceso de migración se ha detenido por un error.');
+        console.error('El proceso de migración se ha detenido por un error:', err);
         process.exitCode = 1;
     } finally {
         await pool.end();
