@@ -29,7 +29,7 @@ export default function PostDetail() {
             if (!activo) return;
             setPost(postsRes.data.find(p => String(p.id) === String(id)) || null);
             setComentarios(comentariosRes.data);
-        }).catch(err => console.error('Error al cargar la publicación:', err))
+        }).catch(err => console.error('Error loading post:', err))
             .finally(() => { if (activo) setCargando(false); });
         return () => { activo = false; };
     }, [id]);
@@ -37,7 +37,7 @@ export default function PostDetail() {
     const esAutor = user && post && String(user.id) === String(post.usuario_id);
 
     const handleLike = async () => {
-        if (!user) return mostrarToast("Inicia sesión para dar like", "error");
+        if (!user) return mostrarToast("Log in to like this", "error");
         try {
             const res = await api.post(`/publicaciones/${id}/like`);
             setPost(prev => ({
@@ -46,7 +46,7 @@ export default function PostDetail() {
                 user_liked: res.data.liked
             }));
         } catch (err) {
-            console.error('Error al dar like:', err);
+            console.error('Error liking post:', err);
         }
     };
 
@@ -56,10 +56,10 @@ export default function PostDetail() {
         setEnviando(true);
         try {
             const res = await api.post(`/publicaciones/${id}/comentarios`, { contenido: nuevoComentario });
-            setComentarios(prev => [...prev, { ...res.data, autor: user?.nombre || 'Tú' }]);
+            setComentarios(prev => [...prev, { ...res.data, autor: user?.nombre || 'You' }]);
             setNuevoComentario('');
         } catch (err) {
-            mostrarToast(err.response?.data?.error || "Error al enviar el comentario", "error");
+            mostrarToast(err.response?.data?.error || "Error posting comment", "error");
         } finally {
             setEnviando(false);
         }
@@ -71,16 +71,16 @@ export default function PostDetail() {
             await api.delete(`/publicaciones/${id}`);
             navigate('/publicaciones');
         } catch (err) {
-            mostrarToast(err.response?.data?.error || "Error al eliminar la publicación", "error");
+            mostrarToast(err.response?.data?.error || "Error deleting post", "error");
         }
     };
 
-    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Cargando...</div>;
+    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Loading...</div>;
 
     if (!post) return (
         <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white pt-24 gap-4 px-4 text-center">
-            <p className="text-zinc-400">No se ha encontrado esta publicación.</p>
-            <Link to="/publicaciones" className="text-red-500 hover:underline">Volver a publicaciones</Link>
+            <p className="text-zinc-400">This post could not be found.</p>
+            <Link to="/publicaciones" className="text-red-500 hover:underline">Back to posts</Link>
         </div>
     );
 
@@ -89,15 +89,15 @@ export default function PostDetail() {
             <div className="max-w-xl mx-auto">
                 <div className="flex items-center justify-between mb-6">
                     <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm">
-                        <ArrowLeft size={18} /> Volver
+                        <ArrowLeft size={18} /> Back
                     </button>
                     {esAutor && (
                         <div className="flex items-center gap-3">
                             <Link to={`/publicaciones/${id}/editar`} className="flex items-center gap-1 text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition">
-                                <Pencil size={12} /> Editar
+                                <Pencil size={12} /> Edit
                             </Link>
                             <button onClick={() => setConfirmandoEliminar(true)} className="flex items-center gap-1 text-xs font-bold bg-red-950 hover:bg-red-900 text-red-400 px-3 py-1.5 rounded-full transition">
-                                <Trash2 size={12} /> Eliminar
+                                <Trash2 size={12} /> Delete
                             </button>
                         </div>
                     )}
@@ -108,7 +108,7 @@ export default function PostDetail() {
                         <Avatar nombre={post.nombre_autor} avatarUrl={post.avatar_autor} tamaño="w-10 h-10" />
                         <div className="flex-1 min-w-0">
                             <p className="font-bold text-white truncate">{post.nombre_autor}</p>
-                            <p className="text-xs text-zinc-500">{new Date(post.fecha_registro).toLocaleString('es-ES')}</p>
+                            <p className="text-xs text-zinc-500">{new Date(post.fecha_registro).toLocaleString('en-US')}</p>
                         </div>
                         {post.coche_marca && (
                             <span className="flex items-center gap-1 bg-zinc-800 text-zinc-300 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase shrink-0">
@@ -136,7 +136,7 @@ export default function PostDetail() {
                 </div>
 
                 <div className="space-y-3 mb-6">
-                    {comentarios.length === 0 && <p className="text-zinc-600 text-sm">Todavía no hay comentarios.</p>}
+                    {comentarios.length === 0 && <p className="text-zinc-600 text-sm">No comments yet.</p>}
                     {comentarios.map(com => (
                         <div key={com.id} className="text-sm bg-zinc-900 border border-white/5 p-3 rounded-2xl">
                             <span className="font-black text-red-500 mr-2 uppercase text-[10px]">{com.autor}:</span>
@@ -151,7 +151,7 @@ export default function PostDetail() {
                             type="text"
                             value={nuevoComentario}
                             onChange={(e) => setNuevoComentario(e.target.value)}
-                            placeholder="Comentar..."
+                            placeholder="Add a comment..."
                             className="flex-1 bg-zinc-800 rounded-2xl px-5 py-3 text-sm text-white focus:outline-none"
                         />
                         <button type="submit" disabled={enviando} className="bg-red-600 disabled:opacity-50 p-3 rounded-2xl">
@@ -159,14 +159,14 @@ export default function PostDetail() {
                         </button>
                     </form>
                 ) : (
-                    <p className="text-xs text-zinc-600 text-center uppercase italic font-black">Identifícate para comentar</p>
+                    <p className="text-xs text-zinc-600 text-center uppercase italic font-black">Log in to comment</p>
                 )}
             </div>
 
             <ConfirmModal
                 abierto={confirmandoEliminar}
-                titulo="Eliminar publicación"
-                mensaje="¿Seguro que quieres eliminar esta publicación? Esta acción no se puede deshacer."
+                titulo="Delete post"
+                mensaje="Are you sure you want to delete this post? This action cannot be undone."
                 onConfirmar={handleEliminar}
                 onCancelar={() => setConfirmandoEliminar(false)}
             />

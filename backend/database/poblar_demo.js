@@ -39,36 +39,36 @@ const COCHES_POOL = [
     ['Porsche', 'Cayman'], ['Nissan', '370Z'], ['Dodge', 'Challenger'], ['Mini', 'Cooper S'],
     ['Citroen', 'Saxo VTS'], ['Opel', 'Corsa GSI'], ['Volvo', 'C30'], ['Skoda', 'Fabia RS'],
 ];
-const COLORES = ['Rojo', 'Negro', 'Blanco', 'Azul', 'Gris', 'Amarillo', 'Verde', 'Naranja', 'Plata'];
+const COLORES = ['Red', 'Black', 'White', 'Blue', 'Gray', 'Yellow', 'Green', 'Orange', 'Silver'];
 
 const BIOS = [
-    'Apasionado de los motores desde siempre.', 'Los fines de semana son para la carretera.',
-    'Restaurando clásicos en mi tiempo libre.', 'JDM hasta la médula.', 'Track days y café.',
-    'Coleccionista de kilómetros y anécdotas.', 'Si suena bien, va bien.', 'Garaje siempre abierto.',
+    'A lifelong car enthusiast.', 'Weekends are for the open road.',
+    'Restoring classics in my spare time.', 'JDM through and through.', 'Track days and coffee.',
+    'Collecting miles and stories.', 'If it sounds good, it drives good.', 'Garage is always open.',
     '', '', '', // algunas bios vacías, para que no todo el mundo tenga una
 ];
 
 const TEXTOS_PUBLICACION = [
-    'Domingo de carretera con este compañero de viaje 🏁',
-    'Recién salido del taller, como nuevo.',
-    'Pulido de la mañana antes de la quedada de hoy.',
-    'No hay nada como el sonido de este motor arrancando en frío.',
-    '¿Alguien más para la quedada del sábado?',
-    'Últimos retoques antes de la ITV.',
-    'Cambié las llantas y quedó otro coche completamente distinto.',
-    'Un año más con él, y no me cansa.',
-    'Ruta de montaña este finde, fotos random.',
-    'Pequeña puesta a punto para la temporada que viene.',
-    'Encontré este cartel vintage a juego con el coche, no pude resistirme.',
-    'Café + coches, la combinación perfecta de sábado por la mañana.',
-    'Nueva incorporación al garaje, ya os cuento más.',
-    'Repasando la mecánica antes del viaje largo del mes que viene.',
+    'Sunday drive with this travel companion 🏁',
+    'Fresh out of the shop and running like new.',
+    'A morning polish before today\'s meetup.',
+    'Nothing beats the sound of this engine starting from cold.',
+    'Anyone else coming to Saturday\'s meetup?',
+    'Final touches before inspection day.',
+    'Changed the wheels and it feels like a completely different car.',
+    'Another year together, and I still love it.',
+    'Mountain roads this weekend. A few snapshots.',
+    'A little tune-up for next season.',
+    'Found this vintage sign to match the car. Couldn\'t resist.',
+    'Coffee + cars: the perfect Saturday morning combo.',
+    'A new addition to the garage. More soon.',
+    'Checking everything over before next month\'s long drive.',
 ];
 
 const COMENTARIOS_POOL = [
-    '¡Qué pasada!', 'Menuda bestia 🔥', '¿Cuántos caballos tiene?', 'Me encanta el color',
-    '¡Brutal!', 'Quiero uno igual', '¿Está en venta?', 'Impresionante acabado',
-    'Se ve genial así', 'Enhorabuena por el trabajo', 'Un clásico como pocos', 'Suena de maravilla seguro',
+    'That is awesome!', 'What a beast 🔥', 'How much horsepower?', 'Love the color',
+    'Absolutely brilliant!', 'I want one just like it', 'Is it for sale?', 'Incredible finish',
+    'Looks great like that', 'Great work on it', 'A rare kind of classic', 'Bet it sounds amazing',
 ];
 
 // --- Utilidades ---
@@ -123,12 +123,12 @@ async function yaSePobló() {
 
 async function poblar() {
     if (await yaSePobló()) {
-        console.log(`Ya existen usuarios con dominio ${DOMINIO_DEMO} — no se hace nada, para no duplicar.`);
-        console.log('Si quieres volver a poblar, borra antes esas cuentas a mano.');
+        console.log(`Users with the ${DOMINIO_DEMO} domain already exist; skipping to avoid duplicates.`);
+        console.log('To seed again, delete those accounts manually first.');
         return;
     }
 
-    console.log(`Generando ${N_USUARIOS} usuarios...`);
+    console.log(`Creating ${N_USUARIOS} users...`);
     const hash = await bcrypt.hash(PASSWORD_DEMO, 10);
     const nombresUsados = new Set();
     const filasUsuarios = [];
@@ -141,9 +141,9 @@ async function poblar() {
         filasUsuarios.push([nombre, email, hash, bio, urlImagen('portrait,person')]);
     }
     const idsUsuarios = await ejecutarInsert('usuarios', ['nombre', 'email', 'password', 'bio', 'avatar_url'], filasUsuarios);
-    console.log(`✓ ${idsUsuarios.length} usuarios creados`);
+    console.log(`✓ Created ${idsUsuarios.length} users`);
 
-    console.log('Generando coches...');
+    console.log('Creating cars...');
     const filasCoches = [];
     const cochesPorUsuario = new Map(); // usuario_id -> [coche index en filasCoches]
     for (const uid of idsUsuarios) {
@@ -165,9 +165,9 @@ async function poblar() {
         ['marca', 'modelo', 'año', 'propietario_id', 'descripcion', 'foto_url', 'potencia_cv', 'kilometraje', 'color'],
         filasCoches
     );
-    console.log(`✓ ${idsCoches.length} coches creados`);
+    console.log(`✓ Created ${idsCoches.length} cars`);
 
-    console.log('Generando publicaciones...');
+    console.log('Creating posts...');
     const filasPublicaciones = [];
     for (const uid of idsUsuarios) {
         const nPosts = enteroEntre(0, 3);
@@ -185,9 +185,9 @@ async function poblar() {
     const idsPublicaciones = await ejecutarInsert(
         'publicaciones', ['usuario_id', 'coche_id', 'texto', 'imagen_url'], filasPublicaciones
     );
-    console.log(`✓ ${idsPublicaciones.length} publicaciones creadas`);
+    console.log(`✓ Created ${idsPublicaciones.length} posts`);
 
-    console.log('Generando seguidores...');
+    console.log('Creating follows...');
     const paresSeguidores = new Set();
     const filasSeguidores = [];
     for (const uid of idsUsuarios) {
@@ -201,9 +201,9 @@ async function poblar() {
         }
     }
     await ejecutarInsert('seguidores', ['seguidor_id', 'seguido_id'], filasSeguidores, false);
-    console.log(`✓ ${filasSeguidores.length} relaciones de seguimiento creadas`);
+    console.log(`✓ Created ${filasSeguidores.length} follow relationships`);
 
-    console.log('Generando likes y comentarios en coches...');
+    console.log('Creating car likes and comments...');
     const filasLikesCoches = [];
     const filasComentariosCoches = [];
     for (const cocheId of idsCoches) {
@@ -218,9 +218,9 @@ async function poblar() {
     }
     await ejecutarInsert('me_gusta', ['usuario_id', 'coche_id'], filasLikesCoches, false);
     await ejecutarInsert('comentarios', ['coche_id', 'usuario_id', 'contenido'], filasComentariosCoches);
-    console.log(`✓ ${filasLikesCoches.length} likes y ${filasComentariosCoches.length} comentarios en coches`);
+    console.log(`✓ Created ${filasLikesCoches.length} car likes and ${filasComentariosCoches.length} comments`);
 
-    console.log('Generando likes y comentarios en publicaciones...');
+    console.log('Creating post likes and comments...');
     const filasLikesPosts = [];
     const filasComentariosPosts = [];
     for (const postId of idsPublicaciones) {
@@ -235,16 +235,16 @@ async function poblar() {
     }
     await ejecutarInsert('publicacion_likes', ['usuario_id', 'publicacion_id'], filasLikesPosts, false);
     await ejecutarInsert('publicacion_comentarios', ['publicacion_id', 'usuario_id', 'contenido'], filasComentariosPosts);
-    console.log(`✓ ${filasLikesPosts.length} likes y ${filasComentariosPosts.length} comentarios en publicaciones`);
+    console.log(`✓ Created ${filasLikesPosts.length} post likes and ${filasComentariosPosts.length} comments`);
 
-    console.log('\nListo. Contraseña de las cuentas nuevas: demo1234 (email: <nombre_en_minusculas>@demo-motorsocial.com)');
+    console.log('\nDone. New account password: demo1234 (email: <lowercase_name>@demo-motorsocial.com)');
 }
 
 async function main() {
     try {
         await poblar();
     } catch (err) {
-        console.error('Error al poblar la base de datos:', err);
+        console.error('Error seeding the database:', err);
         process.exitCode = 1;
     } finally {
         await pool.end();

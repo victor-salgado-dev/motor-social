@@ -23,11 +23,11 @@ export default function EditPost() {
         return () => { activo = false; };
     }, [id]);
 
-    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Cargando...</div>;
+    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Loading...</div>;
 
     if (!post) return (
         <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white pt-24 gap-4 px-4 text-center">
-            <p className="text-zinc-400">No se ha encontrado esta publicación.</p>
+            <p className="text-zinc-400">This post could not be found.</p>
             <Link to="/publicaciones" className="text-red-500 hover:underline">Volver</Link>
         </div>
     );
@@ -35,8 +35,8 @@ export default function EditPost() {
     if (!user || String(post.usuario_id) !== String(user.id)) {
         return (
             <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white pt-24 gap-4 px-4 text-center">
-                <p className="text-zinc-400">No puedes editar una publicación que no es tuya.</p>
-                <Link to={`/publicaciones/${id}`} className="text-red-500 hover:underline">Volver a la publicación</Link>
+                <p className="text-zinc-400">You can't edit someone else's post.</p>
+                <Link to={`/publicaciones/${id}`} className="text-red-500 hover:underline">Back to post</Link>
             </div>
         );
     }

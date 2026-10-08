@@ -22,20 +22,20 @@ export default function FollowList({ tipo }) {
             if (!activo) return;
             setNombrePerfil(perfilRes.data.nombre);
             setPersonas(listaRes.data);
-        }).catch(err => console.error('Error al cargar la lista:', err))
+        }).catch(err => console.error('Error loading list:', err))
             .finally(() => { if (activo) setCargando(false); });
         return () => { activo = false; };
     }, [id, tipo]);
 
-    const titulo = tipo === 'seguidores' ? 'Seguidores' : 'Siguiendo';
+    const titulo = tipo === 'seguidores' ? 'Followers' : 'Following';
 
-    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Cargando...</div>;
+    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Loading...</div>;
 
     return (
         <div className="min-h-screen bg-zinc-950 pt-24 pb-12 px-4">
             <div className="max-w-md mx-auto">
                 <Link to={`/usuarios/${id}`} className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-6">
-                    <ArrowLeft size={18} /> Volver al perfil
+                    <ArrowLeft size={18} /> Back to profile
                 </Link>
 
                 <h1 className="text-xl font-black uppercase italic text-white mb-6">
@@ -44,7 +44,7 @@ export default function FollowList({ tipo }) {
 
                 {personas.length === 0 ? (
                     <p className="text-zinc-600 text-sm">
-                        {tipo === 'seguidores' ? 'Todavía no tiene seguidores.' : 'Todavía no sigue a nadie.'}
+                        {tipo === 'seguidores' ? 'No followers yet.' : 'Not following anyone yet.'}
                     </p>
                 ) : (
                     <div className="space-y-2">

@@ -16,13 +16,13 @@ export default function PublicacionForm({ publicacion = null, onGuardado }) {
     useEffect(() => {
         api.get('/mis-coches')
             .then(res => setMisCoches(res.data.garaje))
-            .catch(err => console.error('Error al cargar tus coches:', err));
+            .catch(err => console.error('Error loading your cars:', err));
     }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!texto.trim() && !imagen && !publicacion?.imagen_url) {
-            mostrarToast("Escribe algo o añade una imagen", "error");
+            mostrarToast("Write something or add an image", "error");
             return;
         }
         setEnviando(true);
@@ -37,9 +37,9 @@ export default function PublicacionForm({ publicacion = null, onGuardado }) {
                 : await api.post('/publicaciones', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 
             onGuardado(res.data);
-            mostrarToast(esEdicion ? "Publicación actualizada" : "Publicación creada", "exito");
+            mostrarToast(esEdicion ? "Post updated" : "Post created", "exito");
         } catch (err) {
-            mostrarToast(err.response?.data?.error || "Error al guardar la publicación", "error");
+            mostrarToast(err.response?.data?.error || "Error saving post", "error");
         } finally {
             setEnviando(false);
         }
@@ -48,26 +48,26 @@ export default function PublicacionForm({ publicacion = null, onGuardado }) {
     return (
         <div className="w-full max-w-lg bg-zinc-900 p-6 sm:p-8 rounded-3xl border border-white/10 h-fit">
             <h2 className="text-2xl font-bold text-white mb-6">
-                {esEdicion ? <>Editar <span className="text-red-600">Publicación</span></> : <>Nueva <span className="text-red-600">Publicación</span></>}
+                {esEdicion ? <>Edit <span className="text-red-600">Post</span></> : <>New <span className="text-red-600">Post</span></>}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <textarea
                     value={texto}
                     onChange={e => setTexto(e.target.value)}
-                    placeholder="¿Qué has hecho con tu coche hoy?"
+                    placeholder="What have you been up to with your car today?"
                     className="w-full bg-zinc-800 border-none rounded-xl p-4 text-white focus:ring-2 focus:ring-red-600 outline-none transition h-28 resize-none"
                 />
 
                 {misCoches.length > 0 && (
                     <div>
-                        <label className="text-xs font-bold text-zinc-500 uppercase ml-1 flex items-center gap-1"><CarFront size={12} /> Etiquetar un coche (opcional)</label>
+                        <label className="text-xs font-bold text-zinc-500 uppercase ml-1 flex items-center gap-1"><CarFront size={12} /> Tag a car (optional)</label>
                         <select
                             value={cocheId}
                             onChange={e => setCocheId(e.target.value)}
                             className="w-full bg-zinc-800 border-none rounded-xl p-4 text-white focus:ring-2 focus:ring-red-600 outline-none transition"
                         >
-                            <option value="">Ninguno</option>
+                            <option value="">None</option>
                             {misCoches.map(c => (
                                 <option key={c.id} value={c.id}>{c.marca} {c.modelo}</option>
                             ))}
@@ -79,12 +79,12 @@ export default function PublicacionForm({ publicacion = null, onGuardado }) {
                     <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={e => setImagen(e.target.files[0])} />
                     <Image className="mx-auto mb-2 text-zinc-500" size={28} />
                     <p className="text-xs text-zinc-500">
-                        {imagen ? imagen.name : (esEdicion && publicacion.imagen_url ? "Cambiar imagen (opcional)" : "Añadir imagen (opcional)")}
+                        {imagen ? imagen.name : (esEdicion && publicacion.imagen_url ? "Change image (optional)" : "Add an image (optional)")}
                     </p>
                 </div>
 
                 <button type="submit" disabled={enviando} className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition">
-                    <Send size={18} /> {enviando ? "Publicando..." : (esEdicion ? "Guardar cambios" : "Publicar")}
+                    <Send size={18} /> {enviando ? "Publishing..." : (esEdicion ? "Save changes" : "Publish")}
                 </button>
             </form>
         </div>

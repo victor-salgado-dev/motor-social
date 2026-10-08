@@ -13,7 +13,7 @@ const app = express();
 
 // --- VALIDACIÓN DE ARRANQUE ---
 if (!process.env.JWT_SECRET) {
-    console.error('FATAL: falta la variable de entorno JWT_SECRET. El servidor no puede arrancar de forma segura.');
+    console.error('FATAL: JWT_SECRET environment variable is missing. The server cannot start securely.');
     process.exit(1);
 }
 
@@ -37,7 +37,7 @@ const upload = multer({
         if (TIPOS_IMAGEN_PERMITIDOS.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error('Tipo de archivo no permitido. Solo se aceptan imágenes (jpg, png, webp, gif).'));
+            cb(new Error('File type not allowed. Only images (jpg, png, webp, gif) are accepted.'));
         }
     }
 });
@@ -53,10 +53,10 @@ const SECRET_KEY = process.env.JWT_SECRET;
 const autenticarToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    if (!token) return res.status(401).json({ error: "No hay token" });
+    if (!token) return res.status(401).json({ error: "No token provided" });
 
     jwt.verify(token, SECRET_KEY, (err, usuario) => {
-        if (err) return res.status(403).json({ error: "Token inválido" });
+        if (err) return res.status(403).json({ error: "Invalid token" });
         req.usuario = usuario;
         next();
     });
@@ -81,10 +81,10 @@ app.post('/usuarios', async (req, res) => {
     try {
         const { nombre, email, password } = req.body;
         if (!nombre || !email || !password) {
-            return res.status(400).json({ error: "Faltan campos obligatorios (nombre, email, password)" });
+            return res.status(400).json({ error: "Required fields are missing (name, email, password)" });
         }
         if (typeof password !== 'string' || password.length < 6) {
-            return res.status(400).json({ error: "La contraseña debe tener al menos 6 caracteres" });
+            return res.status(400).json({ error: "Password must be at least 6 characters long" });
         }
         const hashed = await bcrypt.hash(password, 10);
         const result = await pool.query(
@@ -94,10 +94,10 @@ app.post('/usuarios', async (req, res) => {
         res.json(result.rows[0]);
     } catch (err) {
         if (err.code === '23505') {
-            return res.status(409).json({ error: "Ese email ya está registrado" });
+            return res.status(409).json({ error: "That email is already registered" });
         }
-        console.error('Error en POST /usuarios:', err);
-        res.status(500).json({ error: "Error al registrar el usuario" });
+        console.error('Error in POST /usuarios:', err);
+        res.status(500).json({ error: "Error registering user" });
     }
 });
 
@@ -105,17 +105,17 @@ app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            return res.status(400).json({ error: "Faltan email o password" });
+            return res.status(400).json({ error: "Email or password is missing" });
         }
         const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-        if (result.rows.length === 0) return res.status(401).json({ error: "Usuario no encontrado" });
+        if (result.rows.length === 0) return res.status(401).json({ error: "User not found" });
         const valid = await bcrypt.compare(password, result.rows[0].password);
-        if (!valid) return res.status(401).json({ error: "Password incorrecta" });
+        if (!valid) return res.status(401).json({ error: "Incorrect password" });
         const token = jwt.sign({ id: result.rows[0].id, nombre: result.rows[0].nombre, avatar_url: result.rows[0].avatar_url }, SECRET_KEY, { expiresIn: '24h' });
         res.json({ token });
     } catch (err) {
-        console.error('Error en /login:', err);
-        res.status(500).json({ error: "Error al iniciar sesión" });
+        console.error('Error in /login:', err);
+        res.status(500).json({ error: "Error logging in" });
     }
 });
 
@@ -131,7 +131,7 @@ app.get('/coches-detallados', async (req, res) => {
         const result = await pool.query(query);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error en /coches-detallados:', err);
+        console.error('Error in /coches-detallados:', err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -141,8 +141,8 @@ app.get('/mis-coches', autenticarToken, async (req, res) => {
         const result = await pool.query('SELECT * FROM coches WHERE propietario_id = $1 ORDER BY id DESC', [req.usuario.id]);
         res.json({ garaje: result.rows });
     } catch (err) {
-        console.error('Error en /mis-coches:', err);
-        res.status(500).json({ error: "Error al cargar el garaje" });
+        console.error('Error in /mis-coches:', err);
+        res.status(500).json({ error: "Error loading garage" });
     }
 });
 
@@ -155,15 +155,15 @@ app.post('/coches', autenticarToken, (req, res, next) => {
     try {
         const { marca, modelo, año, descripcion, potencia_cv, kilometraje, color } = req.body;
         if (!marca || !modelo) {
-            return res.status(400).json({ error: "Faltan marca o modelo" });
+            return res.status(400).json({ error: "Make or model is missing" });
         }
         const foto_url = req.file ? `/uploads/${req.file.filename}` : null;
         const query = `INSERT INTO coches (marca, modelo, año, propietario_id, descripcion, foto_url, potencia_cv, kilometraje, color) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`;
         const result = await pool.query(query, [marca, modelo, año || null, req.usuario.id, descripcion, foto_url, potencia_cv || null, kilometraje || null, color || null]);
         res.status(201).json(result.rows[0]);
     } catch (err) {
-        console.error('Error en POST /coches:', err);
-        res.status(500).json({ error: "Error al guardar el coche" });
+        console.error('Error in POST /coches:', err);
+        res.status(500).json({ error: "Error saving car" });
     }
 });
 
@@ -178,7 +178,7 @@ async function crearNotificacion(usuarioId, actorId, tipo, referenciaId = null) 
             [usuarioId, actorId, tipo, referenciaId]
         );
     } catch (err) {
-        console.error('Error al crear notificación:', err);
+        console.error('Error creating notification:', err);
     }
 }
 
@@ -202,7 +202,7 @@ app.post('/coches/:id/like', autenticarToken, async (req, res) => {
 
         res.json({ success: true, liked: liked });
     } catch (err) {
-        console.error('Error en /like:', err);
+        console.error('Error in /like:', err);
         res.status(500).json({ error: "Error" });
     }
 });
@@ -217,8 +217,8 @@ app.get('/coches/:id/comentarios', async (req, res) => {
         const result = await pool.query(query, [req.params.id]);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error en GET /comentarios:', err);
-        res.status(500).json({ error: "Error al cargar comentarios" });
+        console.error('Error in GET /comentarios:', err);
+        res.status(500).json({ error: "Error loading comments" });
     }
 });
 
@@ -226,7 +226,7 @@ app.post('/coches/:id/comentarios', autenticarToken, async (req, res) => {
     try {
         const { contenido } = req.body;
         if (!contenido || !contenido.trim()) {
-            return res.status(400).json({ error: "El comentario no puede estar vacío" });
+            return res.status(400).json({ error: "Comment cannot be empty" });
         }
         const query = `INSERT INTO comentarios (coche_id, usuario_id, contenido) VALUES ($1, $2, $3) RETURNING *`;
         const result = await pool.query(query, [req.params.id, req.usuario.id, contenido]);
@@ -238,8 +238,8 @@ app.post('/coches/:id/comentarios', autenticarToken, async (req, res) => {
 
         res.json(result.rows[0]);
     } catch (err) {
-        console.error('Error en POST /comentarios:', err);
-        res.status(500).json({ error: "Error al guardar el comentario" });
+        console.error('Error in POST /comentarios:', err);
+        res.status(500).json({ error: "Error saving comment" });
     }
 });
 
@@ -251,7 +251,7 @@ app.get('/usuarios/:id', autenticarOpcional, async (req, res) => {
             [req.params.id]
         );
         if (userResult.rows.length === 0) {
-            return res.status(404).json({ error: "Usuario no encontrado" });
+            return res.status(404).json({ error: "User not found" });
         }
         const statsResult = await pool.query(`
             SELECT
@@ -273,8 +273,8 @@ app.get('/usuarios/:id', autenticarOpcional, async (req, res) => {
 
         res.json({ ...userResult.rows[0], ...statsResult.rows[0], le_sigues: teSigue });
     } catch (err) {
-        console.error('Error en GET /usuarios/:id:', err);
-        res.status(500).json({ error: "Error al cargar el perfil" });
+        console.error('Error in GET /usuarios/:id:', err);
+        res.status(500).json({ error: "Error loading profile" });
     }
 });
 
@@ -287,7 +287,7 @@ app.put('/perfil', autenticarToken, (req, res, next) => {
     try {
         const { nombre, bio } = req.body;
         if (!nombre || !nombre.trim()) {
-            return res.status(400).json({ error: "El nombre no puede estar vacío" });
+            return res.status(400).json({ error: "Name cannot be empty" });
         }
         const nuevoAvatar = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -300,8 +300,8 @@ app.put('/perfil', autenticarToken, (req, res, next) => {
         );
         res.json(result.rows[0]);
     } catch (err) {
-        console.error('Error en PUT /perfil:', err);
-        res.status(500).json({ error: "Error al actualizar el perfil" });
+        console.error('Error in PUT /perfil:', err);
+        res.status(500).json({ error: "Error updating profile" });
     }
 });
 
@@ -309,10 +309,10 @@ app.put('/perfil', autenticarToken, (req, res, next) => {
 app.post('/usuarios/:id/seguir', autenticarToken, async (req, res) => {
     try {
         if (String(req.usuario.id) === String(req.params.id)) {
-            return res.status(400).json({ error: "No puedes seguirte a ti mismo" });
+            return res.status(400).json({ error: "You cannot follow yourself" });
         }
         const existeUsuario = await pool.query('SELECT 1 FROM usuarios WHERE id = $1', [req.params.id]);
-        if (existeUsuario.rows.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
+        if (existeUsuario.rows.length === 0) return res.status(404).json({ error: "User not found" });
 
         const check = await pool.query(
             'SELECT 1 FROM seguidores WHERE seguidor_id = $1 AND seguido_id = $2',
@@ -330,8 +330,8 @@ app.post('/usuarios/:id/seguir', autenticarToken, async (req, res) => {
         }
         res.json({ success: true, siguiendo });
     } catch (err) {
-        console.error('Error en /seguir:', err);
-        res.status(500).json({ error: "Error al actualizar el seguimiento" });
+        console.error('Error in /seguir:', err);
+        res.status(500).json({ error: "Error updating follow status" });
     }
 });
 
@@ -344,8 +344,8 @@ app.get('/usuarios/:id/seguidores', async (req, res) => {
             ORDER BY usuarios.nombre`, [req.params.id]);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error en /seguidores:', err);
-        res.status(500).json({ error: "Error al cargar los seguidores" });
+        console.error('Error in /seguidores:', err);
+        res.status(500).json({ error: "Error loading followers" });
     }
 });
 
@@ -358,8 +358,8 @@ app.get('/usuarios/:id/seguidos', async (req, res) => {
             ORDER BY usuarios.nombre`, [req.params.id]);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error en /seguidos:', err);
-        res.status(500).json({ error: "Error al cargar los seguidos" });
+        console.error('Error in /seguidos:', err);
+        res.status(500).json({ error: "Error loading following list" });
     }
 });
 
@@ -378,8 +378,8 @@ app.get('/feed-personalizado', autenticarToken, async (req, res) => {
         const result = await pool.query(query, [req.usuario.id]);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error en /feed-personalizado:', err);
-        res.status(500).json({ error: "Error al cargar el feed" });
+        console.error('Error in /feed-personalizado:', err);
+        res.status(500).json({ error: "Error loading feed" });
     }
 });
 
@@ -398,12 +398,12 @@ app.put('/coches/:id', autenticarToken, (req, res, next) => {
 }, async (req, res) => {
     try {
         const { existe, esPropietario } = await verificarPropietarioCoche(req.params.id, req.usuario.id);
-        if (!existe) return res.status(404).json({ error: "Coche no encontrado" });
-        if (!esPropietario) return res.status(403).json({ error: "No puedes editar un coche que no es tuyo" });
+        if (!existe) return res.status(404).json({ error: "Car not found" });
+        if (!esPropietario) return res.status(403).json({ error: "You cannot edit someone else's car" });
 
         const { marca, modelo, año, descripcion, potencia_cv, kilometraje, color } = req.body;
         if (!marca || !modelo) {
-            return res.status(400).json({ error: "Faltan marca o modelo" });
+            return res.status(400).json({ error: "Make or model is missing" });
         }
         const nuevaFoto = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -418,22 +418,22 @@ app.put('/coches/:id', autenticarToken, (req, res, next) => {
         );
         res.json(result.rows[0]);
     } catch (err) {
-        console.error('Error en PUT /coches/:id:', err);
-        res.status(500).json({ error: "Error al actualizar el coche" });
+        console.error('Error in PUT /coches/:id:', err);
+        res.status(500).json({ error: "Error updating car" });
     }
 });
 
 app.delete('/coches/:id', autenticarToken, async (req, res) => {
     try {
         const { existe, esPropietario } = await verificarPropietarioCoche(req.params.id, req.usuario.id);
-        if (!existe) return res.status(404).json({ error: "Coche no encontrado" });
-        if (!esPropietario) return res.status(403).json({ error: "No puedes eliminar un coche que no es tuyo" });
+        if (!existe) return res.status(404).json({ error: "Car not found" });
+        if (!esPropietario) return res.status(403).json({ error: "You cannot delete someone else's car" });
 
         await pool.query('DELETE FROM coches WHERE id = $1', [req.params.id]);
         res.json({ success: true });
     } catch (err) {
-        console.error('Error en DELETE /coches/:id:', err);
-        res.status(500).json({ error: "Error al eliminar el coche" });
+        console.error('Error in DELETE /coches/:id:', err);
+        res.status(500).json({ error: "Error deleting car" });
     }
 });
 
@@ -443,8 +443,8 @@ app.get('/coches/:id/fotos', async (req, res) => {
         const result = await pool.query('SELECT * FROM coche_fotos WHERE coche_id = $1 ORDER BY orden, id', [req.params.id]);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error en GET /fotos:', err);
-        res.status(500).json({ error: "Error al cargar las fotos" });
+        console.error('Error in GET /fotos:', err);
+        res.status(500).json({ error: "Error loading photos" });
     }
 });
 
@@ -456,9 +456,9 @@ app.post('/coches/:id/fotos', autenticarToken, (req, res, next) => {
 }, async (req, res) => {
     try {
         const { existe, esPropietario } = await verificarPropietarioCoche(req.params.id, req.usuario.id);
-        if (!existe) return res.status(404).json({ error: "Coche no encontrado" });
-        if (!esPropietario) return res.status(403).json({ error: "No puedes añadir fotos a un coche que no es tuyo" });
-        if (!req.file) return res.status(400).json({ error: "No se ha recibido ninguna foto" });
+        if (!existe) return res.status(404).json({ error: "Car not found" });
+        if (!esPropietario) return res.status(403).json({ error: "You cannot add photos to someone else's car" });
+        if (!req.file) return res.status(400).json({ error: "No photo was received" });
 
         const foto_url = `/uploads/${req.file.filename}`;
         const result = await pool.query(
@@ -467,22 +467,22 @@ app.post('/coches/:id/fotos', autenticarToken, (req, res, next) => {
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
-        console.error('Error en POST /coches/:id/fotos:', err);
-        res.status(500).json({ error: "Error al añadir la foto" });
+        console.error('Error in POST /coches/:id/fotos:', err);
+        res.status(500).json({ error: "Error adding photo" });
     }
 });
 
 app.delete('/coches/:id/fotos/:fotoId', autenticarToken, async (req, res) => {
     try {
         const { existe, esPropietario } = await verificarPropietarioCoche(req.params.id, req.usuario.id);
-        if (!existe) return res.status(404).json({ error: "Coche no encontrado" });
-        if (!esPropietario) return res.status(403).json({ error: "No puedes eliminar fotos de un coche que no es tuyo" });
+        if (!existe) return res.status(404).json({ error: "Car not found" });
+        if (!esPropietario) return res.status(403).json({ error: "You cannot delete photos from someone else's car" });
 
         await pool.query('DELETE FROM coche_fotos WHERE id = $1 AND coche_id = $2', [req.params.fotoId, req.params.id]);
         res.json({ success: true });
     } catch (err) {
-        console.error('Error en DELETE /fotos:', err);
-        res.status(500).json({ error: "Error al eliminar la foto" });
+        console.error('Error in DELETE /fotos:', err);
+        res.status(500).json({ error: "Error deleting photo" });
     }
 });
 
@@ -508,8 +508,8 @@ app.get('/publicaciones', async (req, res) => {
         const result = await pool.query(query);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error en GET /publicaciones:', err);
-        res.status(500).json({ error: "Error al cargar las publicaciones" });
+        console.error('Error in GET /publicaciones:', err);
+        res.status(500).json({ error: "Error loading posts" });
     }
 });
 
@@ -524,14 +524,14 @@ app.post('/publicaciones', autenticarToken, (req, res, next) => {
         const imagen_url = req.file ? `/uploads/${req.file.filename}` : null;
 
         if ((!texto || !texto.trim()) && !imagen_url) {
-            return res.status(400).json({ error: "La publicación necesita texto o una imagen" });
+            return res.status(400).json({ error: "A post needs text or an image" });
         }
 
         // Si se etiqueta un coche, comprobar que existe y que es tuyo.
         if (coche_id) {
             const { existe, esPropietario } = await verificarPropietarioCoche(coche_id, req.usuario.id);
-            if (!existe) return res.status(400).json({ error: "El coche etiquetado no existe" });
-            if (!esPropietario) return res.status(403).json({ error: "Solo puedes etiquetar coches de tu propio garaje" });
+            if (!existe) return res.status(400).json({ error: "The tagged car does not exist" });
+            if (!esPropietario) return res.status(403).json({ error: "You can only tag cars from your own garage" });
         }
 
         const result = await pool.query(
@@ -540,8 +540,8 @@ app.post('/publicaciones', autenticarToken, (req, res, next) => {
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
-        console.error('Error en POST /publicaciones:', err);
-        res.status(500).json({ error: "Error al crear la publicación" });
+        console.error('Error in POST /publicaciones:', err);
+        res.status(500).json({ error: "Error creating post" });
     }
 });
 
@@ -553,16 +553,16 @@ app.put('/publicaciones/:id', autenticarToken, (req, res, next) => {
 }, async (req, res) => {
     try {
         const { existe, esPropietario } = await verificarPropietarioPublicacion(req.params.id, req.usuario.id);
-        if (!existe) return res.status(404).json({ error: "Publicación no encontrada" });
-        if (!esPropietario) return res.status(403).json({ error: "No puedes editar una publicación que no es tuya" });
+        if (!existe) return res.status(404).json({ error: "Post not found" });
+        if (!esPropietario) return res.status(403).json({ error: "You cannot edit someone else's post" });
 
         const { texto, coche_id } = req.body;
         const nuevaImagen = req.file ? `/uploads/${req.file.filename}` : null;
 
         if (coche_id) {
             const check = await verificarPropietarioCoche(coche_id, req.usuario.id);
-            if (!check.existe) return res.status(400).json({ error: "El coche etiquetado no existe" });
-            if (!check.esPropietario) return res.status(403).json({ error: "Solo puedes etiquetar coches de tu propio garaje" });
+            if (!check.existe) return res.status(400).json({ error: "The tagged car does not exist" });
+            if (!check.esPropietario) return res.status(403).json({ error: "You can only tag cars from your own garage" });
         }
 
         const result = await pool.query(
@@ -574,22 +574,22 @@ app.put('/publicaciones/:id', autenticarToken, (req, res, next) => {
         );
         res.json(result.rows[0]);
     } catch (err) {
-        console.error('Error en PUT /publicaciones/:id:', err);
-        res.status(500).json({ error: "Error al actualizar la publicación" });
+        console.error('Error in PUT /publicaciones/:id:', err);
+        res.status(500).json({ error: "Error updating post" });
     }
 });
 
 app.delete('/publicaciones/:id', autenticarToken, async (req, res) => {
     try {
         const { existe, esPropietario } = await verificarPropietarioPublicacion(req.params.id, req.usuario.id);
-        if (!existe) return res.status(404).json({ error: "Publicación no encontrada" });
-        if (!esPropietario) return res.status(403).json({ error: "No puedes eliminar una publicación que no es tuya" });
+        if (!existe) return res.status(404).json({ error: "Post not found" });
+        if (!esPropietario) return res.status(403).json({ error: "You cannot delete someone else's post" });
 
         await pool.query('DELETE FROM publicaciones WHERE id = $1', [req.params.id]);
         res.json({ success: true });
     } catch (err) {
-        console.error('Error en DELETE /publicaciones/:id:', err);
-        res.status(500).json({ error: "Error al eliminar la publicación" });
+        console.error('Error in DELETE /publicaciones/:id:', err);
+        res.status(500).json({ error: "Error deleting post" });
     }
 });
 
@@ -610,7 +610,7 @@ app.post('/publicaciones/:id/like', autenticarToken, async (req, res) => {
         }
         res.json({ success: true, liked });
     } catch (err) {
-        console.error('Error en /publicaciones/:id/like:', err);
+        console.error('Error in /publicaciones/:id/like:', err);
         res.status(500).json({ error: "Error" });
     }
 });
@@ -625,8 +625,8 @@ app.get('/publicaciones/:id/comentarios', async (req, res) => {
         const result = await pool.query(query, [req.params.id]);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error en GET /publicaciones/:id/comentarios:', err);
-        res.status(500).json({ error: "Error al cargar comentarios" });
+        console.error('Error in GET /publicaciones/:id/comentarios:', err);
+        res.status(500).json({ error: "Error loading comments" });
     }
 });
 
@@ -634,7 +634,7 @@ app.post('/publicaciones/:id/comentarios', autenticarToken, async (req, res) => 
     try {
         const { contenido } = req.body;
         if (!contenido || !contenido.trim()) {
-            return res.status(400).json({ error: "El comentario no puede estar vacío" });
+            return res.status(400).json({ error: "Comment cannot be empty" });
         }
         const result = await pool.query(
             `INSERT INTO publicacion_comentarios (publicacion_id, usuario_id, contenido) VALUES ($1, $2, $3) RETURNING *`,
@@ -648,8 +648,8 @@ app.post('/publicaciones/:id/comentarios', autenticarToken, async (req, res) => 
 
         res.json(result.rows[0]);
     } catch (err) {
-        console.error('Error en POST /publicaciones/:id/comentarios:', err);
-        res.status(500).json({ error: "Error al guardar el comentario" });
+        console.error('Error in POST /publicaciones/:id/comentarios:', err);
+        res.status(500).json({ error: "Error saving comment" });
     }
 });
 
@@ -666,8 +666,8 @@ app.get('/notificaciones', autenticarToken, async (req, res) => {
         const result = await pool.query(query, [req.usuario.id]);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error en GET /notificaciones:', err);
-        res.status(500).json({ error: "Error al cargar las notificaciones" });
+        console.error('Error in GET /notificaciones:', err);
+        res.status(500).json({ error: "Error loading notifications" });
     }
 });
 
@@ -679,8 +679,8 @@ app.get('/notificaciones/contador', autenticarToken, async (req, res) => {
         );
         res.json({ no_leidas: parseInt(result.rows[0].count, 10) });
     } catch (err) {
-        console.error('Error en /notificaciones/contador:', err);
-        res.status(500).json({ error: "Error al cargar el contador" });
+        console.error('Error in /notificaciones/contador:', err);
+        res.status(500).json({ error: "Error loading notification count" });
     }
 });
 
@@ -689,8 +689,8 @@ app.post('/notificaciones/marcar-leidas', autenticarToken, async (req, res) => {
         await pool.query('UPDATE notificaciones SET leida = TRUE WHERE usuario_id = $1 AND leida = FALSE', [req.usuario.id]);
         res.json({ success: true });
     } catch (err) {
-        console.error('Error en /notificaciones/marcar-leidas:', err);
-        res.status(500).json({ error: "Error al marcar como leídas" });
+        console.error('Error in /notificaciones/marcar-leidas:', err);
+        res.status(500).json({ error: "Error marking notifications as read" });
     }
 });
 
@@ -721,8 +721,8 @@ app.get('/buscar', async (req, res) => {
 
         res.json({ usuarios: usuarios.rows, coches: coches.rows, publicaciones: publicaciones.rows });
     } catch (err) {
-        console.error('Error en /buscar:', err);
-        res.status(500).json({ error: "Error al buscar" });
+        console.error('Error in /buscar:', err);
+        res.status(500).json({ error: "Error searching" });
     }
 });
 
@@ -742,19 +742,19 @@ app.get('/descubrir', async (req, res) => {
         ]);
         res.json({ perfiles_destacados: perfiles.rows, coches_destacados: coches.rows });
     } catch (err) {
-        console.error('Error en /descubrir:', err);
-        res.status(500).json({ error: "Error al cargar la página de descubrimiento" });
+        console.error('Error in /descubrir:', err);
+        res.status(500).json({ error: "Error loading discovery page" });
     }
 });
 
 // --- RED DE SEGURIDAD: manejador global de errores ---
 app.use((err, req, res, next) => {
-    console.error('Error no controlado:', err);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Unhandled error:', err);
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 process.on('unhandledRejection', (reason) => {
     console.error('Unhandled Rejection:', reason);
 });
 
-app.listen(PORT, () => console.log(`Servidor rugiendo en el puerto ${PORT}`));
+app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));

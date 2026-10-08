@@ -29,10 +29,10 @@ export default function ConfirmModal({ abierto, titulo, mensaje, onConfirmar, on
                         <p className="text-zinc-400 text-sm mb-6">{mensaje}</p>
                         <div className="flex gap-3">
                             <button onClick={onCancelar} className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-xl transition">
-                                Cancelar
+                                Cancel
                             </button>
                             <button onClick={onConfirmar} className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition">
-                                Eliminar
+                                Delete
                             </button>
                         </div>
                     </motion.div>

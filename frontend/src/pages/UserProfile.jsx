@@ -45,7 +45,7 @@ export default function UserProfile() {
     useEffect(cargarPerfil, [id]);
 
     const handleLike = async (idCoche) => {
-        if (!user) return mostrarToast("Inicia sesión para dar like", "error");
+        if (!user) return mostrarToast("Log in to like this", "error");
         try {
             const res = await api.post(`/coches/${idCoche}/like`);
             setCoches(prev => prev.map(c => c.id === idCoche
@@ -53,12 +53,12 @@ export default function UserProfile() {
                 : c
             ));
         } catch (err) {
-            console.error('Error al dar like:', err);
+            console.error('Error liking car:', err);
         }
     };
 
     const handleLikePublicacion = async (idPost) => {
-        if (!user) return mostrarToast("Inicia sesión para dar like", "error");
+        if (!user) return mostrarToast("Log in to like this", "error");
         try {
             const res = await api.post(`/publicaciones/${idPost}/like`);
             setPublicaciones(prev => prev.map(p => p.id === idPost
@@ -66,12 +66,12 @@ export default function UserProfile() {
                 : p
             ));
         } catch (err) {
-            console.error('Error al dar like:', err);
+            console.error('Error liking post:', err);
         }
     };
 
     const handleSeguir = async () => {
-        if (!user) return mostrarToast("Inicia sesión para seguir a otros usuarios", "error");
+        if (!user) return mostrarToast("Log in to follow other users", "error");
         setCambiandoSeguir(true);
         try {
             const res = await api.post(`/usuarios/${id}/seguir`);
@@ -81,18 +81,18 @@ export default function UserProfile() {
                 total_seguidores: res.data.siguiendo ? parseInt(prev.total_seguidores || 0) + 1 : Math.max(0, parseInt(prev.total_seguidores || 0) - 1)
             }));
         } catch (err) {
-            mostrarToast(err.response?.data?.error || "Error al actualizar el seguimiento", "error");
+            mostrarToast(err.response?.data?.error || "Error updating follow status", "error");
         } finally {
             setCambiandoSeguir(false);
         }
     };
 
-    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Cargando perfil...</div>;
+    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Loading profile...</div>;
 
     if (error || !perfil) return (
         <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white pt-24 gap-4 px-4 text-center">
-            <p className="text-zinc-400">No se ha encontrado este perfil.</p>
-            <Link to="/" className="text-red-500 hover:underline">Volver al garage global</Link>
+            <p className="text-zinc-400">This profile could not be found.</p>
+            <Link to="/" className="text-red-500 hover:underline">Back to the global garage</Link>
         </div>
     );
 
@@ -112,7 +112,7 @@ export default function UserProfile() {
                                     to="/perfil/editar"
                                     className="inline-flex items-center gap-1 text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition self-center sm:self-auto"
                                 >
-                                    <Pencil size={12} /> Editar perfil
+                                    <Pencil size={12} /> Edit profile
                                 </Link>
                             ) : (
                                 <button
@@ -120,21 +120,21 @@ export default function UserProfile() {
                                     disabled={cambiandoSeguir}
                                     className={`inline-flex items-center gap-1 text-xs font-bold px-4 py-1.5 rounded-full transition disabled:opacity-50 self-center sm:self-auto ${siguiendo ? 'bg-zinc-800 hover:bg-red-950 hover:text-red-400 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}`}
                                 >
-                                    {siguiendo ? <><UserCheck size={12} /> Siguiendo</> : <><UserPlus size={12} /> Seguir</>}
+                                    {siguiendo ? <><UserCheck size={12} /> Following</> : <><UserPlus size={12} /> Follow</>}
                                 </button>
                             )}
                         </div>
 
-                        <p className="text-zinc-400 text-sm mt-2 max-w-xl">{perfil.bio || 'Sin biografía todavía.'}</p>
+                        <p className="text-zinc-400 text-sm mt-2 max-w-xl">{perfil.bio || 'No bio yet.'}</p>
 
                         <div className="flex items-center justify-center sm:justify-start gap-1 text-zinc-600 text-xs mt-3">
-                            <Calendar size={12} /> Miembro desde {new Date(perfil.fecha_registro).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+                            <Calendar size={12} /> Member since {new Date(perfil.fecha_registro).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                         </div>
 
                         <div className="flex gap-6 mt-6 justify-center sm:justify-start">
                             <div className="text-center">
                                 <div className="flex items-center gap-1 justify-center text-red-600"><Car size={16} /><span className="text-lg font-black text-white">{perfil.total_coches}</span></div>
-                                <p className="text-[10px] uppercase text-zinc-500 tracking-widest">Coches</p>
+                                <p className="text-[10px] uppercase text-zinc-500 tracking-widest">Cars</p>
                             </div>
                             <div className="text-center">
                                 <div className="flex items-center gap-1 justify-center text-red-600"><Heart size={16} /><span className="text-lg font-black text-white">{perfil.total_likes_recibidos}</span></div>
@@ -142,31 +142,31 @@ export default function UserProfile() {
                             </div>
                             <Link to={`/usuarios/${id}/seguidores`} className="text-center hover:opacity-75">
                                 <div className="text-lg font-black text-white">{perfil.total_seguidores}</div>
-                                <p className="text-[10px] uppercase text-zinc-500 tracking-widest">Seguidores</p>
+                                <p className="text-[10px] uppercase text-zinc-500 tracking-widest">Followers</p>
                             </Link>
                             <Link to={`/usuarios/${id}/seguidos`} className="text-center hover:opacity-75">
                                 <div className="text-lg font-black text-white">{perfil.total_seguidos}</div>
-                                <p className="text-[10px] uppercase text-zinc-500 tracking-widest">Siguiendo</p>
+                                <p className="text-[10px] uppercase text-zinc-500 tracking-widest">Following</p>
                             </Link>
                         </div>
                     </div>
                 </div>
 
                 <h2 className="text-xl font-bold text-white mb-6 uppercase italic">
-                    Garaje de <span className="text-red-600">{perfil.nombre}</span>
+                    <span className="text-red-600">{perfil.nombre}'s</span> Garage
                 </h2>
 
                 {coches.length === 0 ? (
-                    <div className="text-center py-16 text-zinc-600">Todavía no ha publicado ningún coche.</div>
+                    <div className="text-center py-16 text-zinc-600">No cars have been added yet.</div>
                 ) : (
                     <CocheGrid coches={coches} onLike={handleLike} ocultarPropietario />
                 )}
 
                 <h2 className="text-xl font-bold text-white mb-6 mt-12 uppercase italic">
-                    Publicaciones de <span className="text-red-600">{perfil.nombre}</span>
+                    Posts by <span className="text-red-600">{perfil.nombre}</span>
                 </h2>
                 {publicaciones.length === 0 ? (
-                    <div className="text-center py-16 text-zinc-600">Todavía no ha publicado nada.</div>
+                    <div className="text-center py-16 text-zinc-600">No posts yet.</div>
                 ) : (
                     <div className="max-w-xl">
                         {publicaciones.map(post => <PostCard key={post.id} post={post} onLike={handleLikePublicacion} />)}

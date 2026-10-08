@@ -7,52 +7,52 @@ const pool = require('../src/db');
 
 const PASSWORD_DEMO = 'demo1234';
 const BIOS = [
-    'Rutas de montaña y coches ligeros.',
-    'Restaurando clásicos pieza a pieza.',
-    'JDM de día, garaje de noche.',
-    'Kilómetros, curvas y café.',
-    'Los domingos son para carretera.',
-    'Fan de los motores atmosféricos.',
-    'Track days y puesta a punto.',
-    'Colecciono historias de carretera.',
-    'Siempre buscando la próxima curva.',
-    'Clásicos europeos con carácter.',
+    'Mountain roads and lightweight cars.',
+    'Restoring classics one part at a time.',
+    'JDM by day, garage by night.',
+    'Miles, corners, and coffee.',
+    'Sundays are for the open road.',
+    'A fan of naturally aspirated engines.',
+    'Track days and fine-tuning.',
+    'Collecting road-trip stories.',
+    'Always looking for the next corner.',
+    'European classics with character.',
 ];
 const COCHES = [
-    { marca: 'Renault', modelo: '5 Turbo', anio: 1985, descripcion: 'Icono del rally de Grupo B.', potencia: 160, kilometraje: 84000, color: 'Rojo' },
-    { marca: 'Porsche', modelo: '911 Carrera', anio: 1991, descripcion: 'Clasico refrigerado por aire, restaurado con mimo.', potencia: 250, kilometraje: 112000, color: 'Plata' },
-    { marca: 'Nissan', modelo: 'Skyline GT-R', anio: 1999, descripcion: 'JDM con puesta a punto ligera.', potencia: 280, kilometraje: 97000, color: 'Azul' },
-    { marca: 'BMW', modelo: 'M3 E46', anio: 2003, descripcion: 'Seis cilindros y traccion trasera.', potencia: 343, kilometraje: 128000, color: 'Negro' },
-    { marca: 'Toyota', modelo: 'Supra', anio: 1998, descripcion: 'Un proyecto que lleva años en marcha.', potencia: 330, kilometraje: 105000, color: 'Blanco' },
-    { marca: 'Mazda', modelo: 'MX-5', anio: 2016, descripcion: 'Ligero, sencillo y perfecto para curvas.', potencia: 160, kilometraje: 62000, color: 'Rojo' },
-    { marca: 'Ford', modelo: 'Mustang GT', anio: 2018, descripcion: 'V8 para disfrutar sin prisas.', potencia: 450, kilometraje: 49000, color: 'Amarillo' },
-    { marca: 'Subaru', modelo: 'Impreza WRX', anio: 2005, descripcion: 'Traccion total y sonido inconfundible.', potencia: 265, kilometraje: 138000, color: 'Azul' },
-    { marca: 'Honda', modelo: 'Civic Type R', anio: 2020, descripcion: 'Chasis preciso para carretera y circuito.', potencia: 320, kilometraje: 38000, color: 'Blanco' },
-    { marca: 'Alfa Romeo', modelo: 'Giulia', anio: 2019, descripcion: 'Diseno italiano y buen equilibrio.', potencia: 280, kilometraje: 57000, color: 'Verde' },
+    { marca: 'Renault', modelo: '5 Turbo', anio: 1985, descripcion: 'A Group B rally icon.', potencia: 160, kilometraje: 84000, color: 'Red' },
+    { marca: 'Porsche', modelo: '911 Carrera', anio: 1991, descripcion: 'A lovingly restored air-cooled classic.', potencia: 250, kilometraje: 112000, color: 'Silver' },
+    { marca: 'Nissan', modelo: 'Skyline GT-R', anio: 1999, descripcion: 'JDM with a few thoughtful upgrades.', potencia: 280, kilometraje: 97000, color: 'Blue' },
+    { marca: 'BMW', modelo: 'M3 E46', anio: 2003, descripcion: 'A straight-six with rear-wheel drive.', potencia: 343, kilometraje: 128000, color: 'Black' },
+    { marca: 'Toyota', modelo: 'Supra', anio: 1998, descripcion: 'A project that has been years in the making.', potencia: 330, kilometraje: 105000, color: 'White' },
+    { marca: 'Mazda', modelo: 'MX-5', anio: 2016, descripcion: 'Lightweight, simple, and perfect for twisty roads.', potencia: 160, kilometraje: 62000, color: 'Red' },
+    { marca: 'Ford', modelo: 'Mustang GT', anio: 2018, descripcion: 'A V8 to enjoy at your own pace.', potencia: 450, kilometraje: 49000, color: 'Yellow' },
+    { marca: 'Subaru', modelo: 'Impreza WRX', anio: 2005, descripcion: 'All-wheel drive and unmistakable sound.', potencia: 265, kilometraje: 138000, color: 'Blue' },
+    { marca: 'Honda', modelo: 'Civic Type R', anio: 2020, descripcion: 'A precise chassis for road and track.', potencia: 320, kilometraje: 38000, color: 'White' },
+    { marca: 'Alfa Romeo', modelo: 'Giulia', anio: 2019, descripcion: 'Italian design and great balance.', potencia: 280, kilometraje: 57000, color: 'Green' },
 ];
 const TEXTOS = [
-    'Primera ruta larga de la temporada. El coche se ha portado de diez.',
-    'Unas horas de garaje y por fin vuelve a sonar como debe.',
-    'La carretera secundaria sigue siendo el mejor plan del domingo.',
-    'Pequenos cambios, grandes sensaciones al volante.',
-    'Quedada de amigos y gasolina de la buena.',
-    'Despues de tantos anos, todavia me giro a mirarlo al aparcar.',
-    'Dia de circuito: aprendiendo en cada vuelta.',
-    'Hoy tocaba dejarlo limpio antes de la proxima salida.',
-    'Una parada para el cafe y otra foto para el recuerdo.',
-    'Cada kilometro suma una historia nueva.',
+    'First long drive of the season. The car was a dream.',
+    'A few hours in the garage and it finally sounds right again.',
+    'A quiet back road is still the best Sunday plan.',
+    'Small changes, big difference behind the wheel.',
+    'A meetup with friends and a proper fill-up.',
+    'After all these years, I still turn around to look at it when I park.',
+    'Track day: learning with every lap.',
+    'Had to get it cleaned up before the next drive.',
+    'A coffee stop and another photo to remember the day.',
+    'Every mile adds a new story.',
 ];
 const COMENTARIOS = [
-    'Que buena pinta tiene ese coche.',
-    'Me encanta esa combinacion de color.',
-    'Ese modelo nunca pasa de moda.',
-    'Tiene que sonar espectacular.',
-    'Gran trabajo, se nota el cuidado.',
-    'Me apunto a la proxima ruta.',
-    'Que ganas de verlo en persona.',
-    'Una joya para disfrutarla en carretera.',
-    'Las llantas le quedan perfectas.',
-    'Buen plan para el fin de semana.',
+    'That car looks great.',
+    'Love that color combination.',
+    'That model never goes out of style.',
+    'It must sound incredible.',
+    'Great work, the care really shows.',
+    "Count me in for the next drive.",
+    "Can't wait to see it in person.",
+    'A gem made for the open road.',
+    'Those wheels suit it perfectly.',
+    'Sounds like a great weekend plan.',
 ];
 const AVATARES = Array.from({ length: 10 }, (_, index) => `/demo/avatar-${String(index + 1).padStart(2, '0')}.jpg`);
 const FOTOS_COCHE = Array.from({ length: 6 }, (_, index) => `/demo/car-${String(index + 1).padStart(2, '0')}.jpg`);
@@ -67,7 +67,7 @@ async function obtenerOcrearUsuario(client, index, passwordHash) {
          VALUES ($1, $2, $3, $4, $5)
          ON CONFLICT (email) DO UPDATE SET bio = EXCLUDED.bio, avatar_url = EXCLUDED.avatar_url
          RETURNING id`,
-        [`Demo_${['Rally', 'Clasicos', 'JDM', 'Garage', 'Turbo', 'Roadster', 'V8', 'Racing', 'Track', 'Italiano'][index]}`, emailDemo(index), passwordHash, BIOS[index], AVATARES[index]]
+        [`Demo_${['Rally', 'Classics', 'JDM', 'Garage', 'Turbo', 'Roadster', 'V8', 'Racing', 'Track', 'Italian'][index]}`, emailDemo(index), passwordHash, BIOS[index], AVATARES[index]]
     );
     return result.rows[0].id;
 }
@@ -126,7 +126,7 @@ async function seed() {
     const client = await pool.connect();
     try {
         if (await yaHayUsuariosNoDemo(client)) {
-            console.log('La base ya contiene usuarios no demo; no se modifica para evitar mezclar datos.');
+            console.log('The database already contains non-demo users; leaving it unchanged to avoid mixing data.');
             return;
         }
 
@@ -202,8 +202,8 @@ async function seed() {
         }
 
         await client.query('COMMIT');
-        console.log('Datos de demo listos: 10 usuarios, 10 coches, 20 publicaciones y actividad social.');
-        console.log(`Acceso demo: ${emailDemo(0)} / ${PASSWORD_DEMO}`);
+        console.log('Demo data ready: 10 users, 10 cars, 20 posts, and social activity.');
+        console.log(`Demo login: ${emailDemo(0)} / ${PASSWORD_DEMO}`);
     } catch (err) {
         await client.query('ROLLBACK');
         throw err;
@@ -216,7 +216,7 @@ async function main() {
     try {
         await seed();
     } catch (err) {
-        console.error('Error al insertar los datos de demo:', err);
+        console.error('Error inserting demo data:', err);
         process.exitCode = 1;
     } finally {
         await pool.end();

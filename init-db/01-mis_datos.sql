@@ -3614,5 +3614,79 @@ ALTER TABLE ONLY public.seguidores
 -- PostgreSQL database dump complete
 --
 
+-- Translate demo content loaded from the legacy Spanish data dump.
+CREATE TEMP TABLE seed_translations (source_text text PRIMARY KEY, translated_text text NOT NULL);
+INSERT INTO seed_translations (source_text, translated_text) VALUES
+    ('Rojo', 'Red'), ('Negro', 'Black'), ('Blanco', 'White'), ('Azul', 'Blue'),
+    ('Gris', 'Gray'), ('gris', 'Gray'), ('Amarillo', 'Yellow'), ('Verde', 'Green'),
+    ('Naranja', 'Orange'), ('Plata', 'Silver'),
+    ('Restaurado íntegramente en 2023.', 'Fully restored in 2023.'),
+    ('Preparación ligera de escape y suspensión.', 'Mild exhaust and suspension upgrades.'),
+    ('Icono del rally de Grupo B.', 'A Group B rally icon.'),
+    ('Apasionado de los motores desde siempre.', 'A lifelong car enthusiast.'),
+    ('Los fines de semana son para la carretera.', 'Weekends are for the open road.'),
+    ('Restaurando clásicos en mi tiempo libre.', 'Restoring classics in my spare time.'),
+    ('JDM hasta la médula.', 'JDM through and through.'),
+    ('Track days y café.', 'Track days and coffee.'),
+    ('Coleccionista de kilómetros y anécdotas.', 'Collecting miles and stories.'),
+    ('Si suena bien, va bien.', 'If it sounds good, it drives good.'),
+    ('Garaje siempre abierto.', 'Garage is always open.'),
+    ('¡Qué pasada!', 'That is awesome!'), ('Menuda bestia 🔥', 'What a beast 🔥'),
+    ('¿Cuántos caballos tiene?', 'How much horsepower?'), ('Me encanta el color', 'Love the color'),
+    ('¡Brutal!', 'Absolutely brilliant!'), ('Quiero uno igual', 'I want one just like it'),
+    ('¿Está en venta?', 'Is it for sale?'), ('Impresionante acabado', 'Incredible finish'),
+    ('Se ve genial así', 'Looks great like that'), ('Enhorabuena por el trabajo', 'Great work on it'),
+    ('Un clásico como pocos', 'A rare kind of classic'), ('Suena de maravilla seguro', 'Bet it sounds amazing'),
+    ('Domingo de carretera con este compañero de viaje 🏁', 'Sunday drive with this travel companion 🏁'),
+    ('Recién salido del taller, como nuevo.', 'Fresh out of the shop and running like new.'),
+    ('Pulido de la mañana antes de la quedada de hoy.', 'A morning polish before today''s meetup.'),
+    ('No hay nada como el sonido de este motor arrancando en frío.', 'Nothing beats the sound of this engine starting from cold.'),
+    ('¿Alguien más para la quedada del sábado?', 'Anyone else coming to Saturday''s meetup?'),
+    ('Últimos retoques antes de la ITV.', 'Final touches before inspection day.'),
+    ('Cambié las llantas y quedó otro coche completamente distinto.', 'Changed the wheels and it feels like a completely different car.'),
+    ('Un año más con él, y no me cansa.', 'Another year together, and I still love it.'),
+    ('Ruta de montaña este finde, fotos random.', 'Mountain roads this weekend. A few snapshots.'),
+    ('Pequeña puesta a punto para la temporada que viene.', 'A little tune-up for next season.'),
+    ('Encontré este cartel vintage a juego con el coche, no pude resistirme.', 'Found this vintage sign to match the car. Couldn''t resist.'),
+    ('Café + coches, la combinación perfecta de sábado por la mañana.', 'Coffee + cars: the perfect Saturday morning combo.'),
+    ('Nueva incorporación al garaje, ya os cuento más.', 'A new addition to the garage. More soon.'),
+    ('Repasando la mecánica antes del viaje largo del mes que viene.', 'Checking everything over before next month''s long drive.');
+
+UPDATE public.coches AS cars
+SET color = translations.translated_text
+FROM pg_temp.seed_translations AS translations
+WHERE cars.color = translations.source_text;
+
+UPDATE public.coches AS cars
+SET descripcion = translations.translated_text
+FROM pg_temp.seed_translations AS translations
+WHERE cars.descripcion = translations.source_text;
+
+UPDATE public.comentarios AS comments
+SET contenido = translations.translated_text
+FROM pg_temp.seed_translations AS translations
+WHERE comments.contenido = translations.source_text;
+
+UPDATE public.publicacion_comentarios AS comments
+SET contenido = translations.translated_text
+FROM pg_temp.seed_translations AS translations
+WHERE comments.contenido = translations.source_text;
+
+UPDATE public.publicaciones AS posts
+SET texto = translations.translated_text
+FROM pg_temp.seed_translations AS translations
+WHERE posts.texto = translations.source_text;
+
+UPDATE public.usuarios AS users
+SET nombre = 'Demo_Classics'
+WHERE users.nombre = 'Demo_Clasicos';
+
+UPDATE public.usuarios AS users
+SET bio = translations.translated_text
+FROM pg_temp.seed_translations AS translations
+WHERE users.bio = translations.source_text;
+
+DROP TABLE seed_translations;
+
 \unrestrict gQikuFqhODyqnQ8rOWfR5aedUfFrl5LDwM6IUmnGgA6FtoYHW93akgKfhasS3Au
 

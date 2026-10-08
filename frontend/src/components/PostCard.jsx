@@ -7,13 +7,13 @@ import { fallbackImagen, imagenCocheDemo, resolverImagen } from '../utils/imagen
 
 function tiempoRelativo(fecha) {
     const segundos = Math.floor((new Date() - new Date(fecha)) / 1000);
-    if (segundos < 60) return 'ahora mismo';
+    if (segundos < 60) return 'just now';
     const minutos = Math.floor(segundos / 60);
-    if (minutos < 60) return `hace ${minutos} min`;
+    if (minutos < 60) return `${minutos} min ago`;
     const horas = Math.floor(minutos / 60);
-    if (horas < 24) return `hace ${horas} h`;
+    if (horas < 24) return `${horas} hr ago`;
     const dias = Math.floor(horas / 24);
-    return `hace ${dias} d`;
+    return `${dias} days ago`;
 }
 
 export default function PostCard({ post, onLike }) {

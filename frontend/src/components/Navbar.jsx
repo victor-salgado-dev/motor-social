@@ -29,11 +29,11 @@ export default function Navbar() {
     // sm:inline) para no saturar la barra; en móvil viven en este menú.
     const enlacesPrincipales = [
         { to: '/', texto: 'Global' },
-        { to: '/publicaciones', texto: 'Publicaciones' },
-        { to: '/descubrir', texto: 'Descubrir' },
+        { to: '/publicaciones', texto: 'Posts' },
+        { to: '/descubrir', texto: 'Discover' },
         ...(user ? [
-            { to: '/garaje', texto: 'Mi Garaje' },
-            { to: '/siguiendo', texto: 'Siguiendo' },
+            { to: '/garaje', texto: 'My Garage' },
+            { to: '/siguiendo', texto: 'Following' },
         ] : []),
     ];
 
@@ -57,10 +57,10 @@ export default function Navbar() {
                     ))}
                     {user ? (
                         <>
-                            <Link to="/create" className="text-zinc-300 hover:text-red-500 transition-colors" title="Añadir coche">
+                            <Link to="/create" className="text-zinc-300 hover:text-red-500 transition-colors" title="Add a car">
                                 <PlusSquare size={22} />
                             </Link>
-                            <Link to="/notificaciones" className="relative text-zinc-300 hover:text-red-500 transition-colors" title="Notificaciones">
+                            <Link to="/notificaciones" className="relative text-zinc-300 hover:text-red-500 transition-colors" title="Notifications">
                                 <Bell size={22} />
                                 {noLeidas > 0 && (
                                     <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
@@ -68,10 +68,10 @@ export default function Navbar() {
                                     </span>
                                 )}
                             </Link>
-                            <Link to={`/usuarios/${user.id}`} title="Mi perfil">
+                            <Link to={`/usuarios/${user.id}`} title="My profile">
                                 <Avatar nombre={user.nombre} avatarUrl={user.avatar_url} tamaño="w-8 h-8 text-sm" />
                             </Link>
-                            <button onClick={() => { logout(); navigate('/'); }} className="hidden sm:block text-zinc-400 hover:text-white" title="Cerrar sesión">
+                            <button onClick={() => { logout(); navigate('/'); }} className="hidden sm:block text-zinc-400 hover:text-white" title="Log out">
                                 <LogOut size={20} />
                             </button>
                         </>
@@ -84,7 +84,7 @@ export default function Navbar() {
                     {/* Botón de menú, solo en móvil: es la única forma de llegar a
                         Global/Publicaciones/Descubrir/Mi Garaje/Siguiendo ahí,
                         ya que esos enlaces de texto se ocultan en pantallas pequeñas. */}
-                    <button onClick={() => setMenuAbierto(v => !v)} className="sm:hidden text-zinc-300" title="Menú">
+                    <button onClick={() => setMenuAbierto(v => !v)} className="sm:hidden text-zinc-300" title="Menu">
                         {menuAbierto ? <X size={24} /> : <Menu size={24} />}
                     </button>
                 </div>
@@ -114,7 +114,7 @@ export default function Navbar() {
                                     onClick={() => { cerrarMenu(); logout(); navigate('/'); }}
                                     className="flex items-center gap-2 text-red-400 hover:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-bold transition-colors text-left"
                                 >
-                                    <LogOut size={16} /> Cerrar sesión
+                                    <LogOut size={16} /> Log out
                                 </button>
                             ) : (
                                 <Link

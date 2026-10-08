@@ -43,7 +43,7 @@ export default function CarDetail() {
             setFotos(fotosRes.data);
             setImagenActiva(null);
         }).catch(err => {
-            console.error('Error al cargar el coche:', err);
+            console.error('Error loading car:', err);
         }).finally(() => {
             if (activo) setCargando(false);
         });
@@ -55,7 +55,7 @@ export default function CarDetail() {
     const esPropietario = user && coche && String(user.id) === String(coche.propietario_id);
 
     const handleLike = async () => {
-        if (!user) return mostrarToast("Inicia sesión para dar like", "error");
+        if (!user) return mostrarToast("Log in to like this", "error");
         try {
             const res = await api.post(`/coches/${id}/like`);
             setCoche(prev => ({
@@ -64,7 +64,7 @@ export default function CarDetail() {
                 user_liked: res.data.liked
             }));
         } catch (err) {
-            console.error('Error al dar like:', err);
+            console.error('Error liking car:', err);
         }
     };
 
@@ -74,10 +74,10 @@ export default function CarDetail() {
         setEnviandoComentario(true);
         try {
             const res = await api.post(`/coches/${id}/comentarios`, { contenido: nuevoComentario });
-            setComentarios(prev => [...prev, { ...res.data, autor: user?.nombre || 'Tú' }]);
+            setComentarios(prev => [...prev, { ...res.data, autor: user?.nombre || 'You' }]);
             setNuevoComentario('');
         } catch (err) {
-            mostrarToast(err.response?.data?.error || "Error al enviar el comentario", "error");
+            mostrarToast(err.response?.data?.error || "Error posting comment", "error");
         } finally {
             setEnviandoComentario(false);
         }
@@ -95,7 +95,7 @@ export default function CarDetail() {
             });
             setFotos(prev => [...prev, res.data]);
         } catch (err) {
-            mostrarToast(err.response?.data?.error || "Error al subir la foto", "error");
+            mostrarToast(err.response?.data?.error || "Error uploading photo", "error");
         } finally {
             setSubiendoFoto(false);
         }
@@ -107,7 +107,7 @@ export default function CarDetail() {
             setFotos(prev => prev.filter(f => f.id !== fotoId));
             setImagenActiva(prev => prev === fotoId ? null : prev);
         } catch (err) {
-            console.error('Error al eliminar la foto:', err);
+            console.error('Error deleting photo:', err);
         }
     };
 
@@ -117,16 +117,16 @@ export default function CarDetail() {
             await api.delete(`/coches/${id}`);
             navigate('/garaje');
         } catch (err) {
-            mostrarToast(err.response?.data?.error || "Error al eliminar el coche", "error");
+            mostrarToast(err.response?.data?.error || "Error deleting car", "error");
         }
     };
 
-    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Cargando...</div>;
+    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Loading...</div>;
 
     if (!coche) return (
         <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white pt-24 gap-4 px-4 text-center">
-            <p className="text-zinc-400">No se ha encontrado este coche.</p>
-            <Link to="/" className="text-red-500 hover:underline">Volver al garage global</Link>
+            <p className="text-zinc-400">This car could not be found.</p>
+            <Link to="/" className="text-red-500 hover:underline">Back to the global garage</Link>
         </div>
     );
 
@@ -141,15 +141,15 @@ export default function CarDetail() {
             <div className="max-w-5xl mx-auto">
                 <div className="flex items-center justify-between mb-6">
                     <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm">
-                        <ArrowLeft size={18} /> Volver
+                        <ArrowLeft size={18} /> Back
                     </button>
                     {esPropietario && (
                         <div className="flex items-center gap-3">
                             <Link to={`/coches/${id}/editar`} className="flex items-center gap-1 text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition">
-                                <Pencil size={12} /> Editar
+                                <Pencil size={12} /> Edit
                             </Link>
                             <button onClick={() => setConfirmandoEliminar(true)} className="flex items-center gap-1 text-xs font-bold bg-red-950 hover:bg-red-900 text-red-400 px-3 py-1.5 rounded-full transition">
-                                <Trash2 size={12} /> Eliminar
+                                <Trash2 size={12} /> Delete
                             </button>
                         </div>
                     )}
@@ -175,7 +175,7 @@ export default function CarDetail() {
                                 <img
                                     src={getImagenCoche(coche.foto_url, coche.id, coche.marca)}
                                     className="w-full h-full object-cover"
-                                    alt="Principal"
+                                    alt="Main photo"
                                     onError={(event) => fallbackImagen(event, getImagenCoche(null, coche.id, coche.marca))}
                                 />
                             </button>
@@ -196,7 +196,7 @@ export default function CarDetail() {
                                         <button
                                             onClick={() => handleEliminarFoto(f.id)}
                                             className="absolute -top-1 -right-1 bg-black/80 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition"
-                                            title="Quitar esta foto"
+                                            title="Remove this photo"
                                         >
                                             <X size={12} className="text-white" />
                                         </button>
@@ -206,7 +206,7 @@ export default function CarDetail() {
                             {esPropietario && (
                                 <label className="w-16 h-16 shrink-0 rounded-lg border-2 border-dashed border-zinc-700 flex items-center justify-center cursor-pointer hover:border-red-600 transition">
                                     {subiendoFoto ? (
-                                        <span className="text-[9px] text-zinc-500">Subiendo…</span>
+                                        <span className="text-[9px] text-zinc-500">Uploading…</span>
                                     ) : (
                                         <Plus size={20} className="text-zinc-600" />
                                     )}
@@ -217,7 +217,7 @@ export default function CarDetail() {
                     </div>
                     <div className="flex-1 flex flex-col border-t md:border-t-0 md:border-l border-white/10">
                         <div className="p-6 sm:p-8 border-b border-white/10">
-                            <p className="text-red-500 text-xs font-black uppercase mb-2">{coche.marca} · {coche.año || 'Año no especificado'}</p>
+                            <p className="text-red-500 text-xs font-black uppercase mb-2">{coche.marca} · {coche.año || 'Year not specified'}</p>
                             <h1 className="text-2xl sm:text-3xl font-black italic uppercase leading-none mb-4 text-white">{coche.modelo}</h1>
 
                             {(coche.potencia_cv || coche.kilometraje || coche.color) && (
@@ -229,7 +229,7 @@ export default function CarDetail() {
                                     )}
                                     {coche.kilometraje && (
                                         <span className="flex items-center gap-1 bg-zinc-800 text-zinc-300 text-xs font-bold px-3 py-1.5 rounded-full">
-                                            <MapPin size={12} className="text-red-500" /> {parseInt(coche.kilometraje).toLocaleString('es-ES')} km
+                                            <MapPin size={12} className="text-red-500" /> {parseInt(coche.kilometraje).toLocaleString('en-US')} km
                                         </span>
                                     )}
                                     {coche.color && (
@@ -241,10 +241,10 @@ export default function CarDetail() {
                             )}
 
                             <p className="text-zinc-400 text-sm italic border-l-2 border-red-600 pl-4">
-                                {coche.descripcion || 'Sin descripción.'}
+                                {coche.descripcion || 'No description.'}
                             </p>
                             <p className="text-zinc-600 text-xs mt-4">
-                                Publicado por{' '}
+                                Posted by{' '}
                                 <Link to={`/usuarios/${coche.propietario_id}`} className="text-zinc-400 hover:text-red-500 underline">
                                     {coche.nombre_propietario}
                                 </Link>
@@ -252,7 +252,7 @@ export default function CarDetail() {
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-4 max-h-96">
-                            {comentarios.length === 0 && <p className="text-zinc-600 text-sm">Todavía no hay comentarios.</p>}
+                            {comentarios.length === 0 && <p className="text-zinc-600 text-sm">No comments yet.</p>}
                             {comentarios.map(com => (
                                 <div key={com.id} className="text-sm bg-zinc-800/40 p-3 rounded-2xl">
                                     <span className="font-black text-red-500 mr-2 uppercase text-[10px]">{com.autor}:</span>
@@ -272,7 +272,7 @@ export default function CarDetail() {
                                         type="text"
                                         value={nuevoComentario}
                                         onChange={(e) => setNuevoComentario(e.target.value)}
-                                        placeholder="Comentar..."
+                                        placeholder="Add a comment..."
                                         className="flex-1 bg-zinc-800 rounded-2xl px-5 py-3 text-sm text-white focus:outline-none"
                                     />
                                     <button type="submit" disabled={enviandoComentario} className="bg-red-600 disabled:opacity-50 p-3 rounded-2xl">
@@ -280,7 +280,7 @@ export default function CarDetail() {
                                     </button>
                                 </form>
                             ) : (
-                                <p className="text-xs text-zinc-600 text-center uppercase italic font-black">Identifícate para comentar</p>
+                                <p className="text-xs text-zinc-600 text-center uppercase italic font-black">Log in to comment</p>
                             )}
                         </div>
                     </div>
@@ -289,8 +289,8 @@ export default function CarDetail() {
 
             <ConfirmModal
                 abierto={confirmandoEliminar}
-                titulo="Eliminar coche"
-                mensaje={`¿Seguro que quieres eliminar ${coche.marca} ${coche.modelo}? Esta acción no se puede deshacer.`}
+                titulo="Delete car"
+                mensaje={`Are you sure you want to delete ${coche.marca} ${coche.modelo}? This action cannot be undone.`}
                 onConfirmar={handleEliminarCoche}
                 onCancelar={() => setConfirmandoEliminar(false)}
             />

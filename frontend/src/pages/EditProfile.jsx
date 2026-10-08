@@ -26,7 +26,7 @@ export default function EditProfile() {
                 setBio(res.data.bio || '');
                 setAvatarActual(res.data.avatar_url);
             })
-            .catch(err => console.error('Error al cargar el perfil:', err))
+            .catch(err => console.error('Error loading profile:', err))
             .finally(() => setCargando(false));
     }, [user]);
 
@@ -39,7 +39,7 @@ export default function EditProfile() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!nombre.trim()) return mostrarToast("El nombre no puede estar vacío", "error");
+        if (!nombre.trim()) return mostrarToast("Name cannot be empty", "error");
         setGuardando(true);
         try {
             const formData = new FormData();
@@ -52,37 +52,37 @@ export default function EditProfile() {
             });
 
             actualizarPerfilLocal({ nombre: res.data.nombre, avatar_url: res.data.avatar_url });
-            mostrarToast("Perfil actualizado", "exito");
+            mostrarToast("Profile updated", "exito");
             navigate(`/usuarios/${user.id}`);
         } catch (err) {
-            mostrarToast(err.response?.data?.error || "Error al guardar el perfil", "error");
+            mostrarToast(err.response?.data?.error || "Error saving profile", "error");
         } finally {
             setGuardando(false);
         }
     };
 
-    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Cargando...</div>;
+    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Loading...</div>;
 
     return (
         <div className="min-h-screen pt-28 sm:pt-32 pb-16 px-4 flex justify-center bg-zinc-950">
             <div className="w-full max-w-md bg-zinc-900 p-6 sm:p-8 rounded-3xl border border-white/10 h-fit">
-                <h2 className="text-2xl font-bold text-white mb-8">Editar <span className="text-red-600">Perfil</span></h2>
+                <h2 className="text-2xl font-bold text-white mb-8">Edit <span className="text-red-600">Profile</span></h2>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="flex flex-col items-center gap-3">
                         {previa ? (
-                            <img src={previa} alt="Vista previa" className="w-24 h-24 rounded-full object-cover border border-white/10" />
+                            <img src={previa} alt="Preview" className="w-24 h-24 rounded-full object-cover border border-white/10" />
                         ) : (
                             <Avatar nombre={nombre} avatarUrl={avatarActual} tamaño="w-24 h-24 text-3xl" />
                         )}
                         <label className="text-xs font-bold text-zinc-400 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-full cursor-pointer flex items-center gap-2 transition">
-                            <Camera size={14} /> Cambiar foto
+                            <Camera size={14} /> Change photo
                             <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
                         </label>
                     </div>
 
                     <div>
-                        <label className="text-xs font-bold text-zinc-500 uppercase ml-1">Nombre</label>
+                        <label className="text-xs font-bold text-zinc-500 uppercase ml-1">Name</label>
                         <input
                             required
                             value={nombre}
@@ -91,17 +91,17 @@ export default function EditProfile() {
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-bold text-zinc-500 uppercase ml-1">Biografía</label>
+                        <label className="text-xs font-bold text-zinc-500 uppercase ml-1">Bio</label>
                         <textarea
                             value={bio}
                             onChange={e => setBio(e.target.value)}
-                            placeholder="Cuéntanos algo sobre ti y tu pasión por los coches..."
+                            placeholder="Tell us about yourself and your passion for cars..."
                             className="w-full bg-zinc-800 border-none rounded-xl p-4 text-white focus:ring-2 focus:ring-red-600 outline-none transition h-28 resize-none"
                         />
                     </div>
 
                     <button type="submit" disabled={guardando} className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl mt-2 flex items-center justify-center gap-2 transition">
-                        <Save size={18} /> {guardando ? "Guardando..." : "Guardar cambios"}
+                        <Save size={18} /> {guardando ? "Saving..." : "Save changes"}
                     </button>
                 </form>
             </div>

@@ -6,21 +6,21 @@ import { Heart, MessageCircle, UserPlus } from 'lucide-react';
 
 function tiempoRelativo(fecha) {
     const segundos = Math.floor((new Date() - new Date(fecha)) / 1000);
-    if (segundos < 60) return 'ahora mismo';
+    if (segundos < 60) return 'just now';
     const minutos = Math.floor(segundos / 60);
-    if (minutos < 60) return `hace ${minutos} min`;
+    if (minutos < 60) return `${minutos} min ago`;
     const horas = Math.floor(minutos / 60);
-    if (horas < 24) return `hace ${horas} h`;
+    if (horas < 24) return `${horas} hr ago`;
     const dias = Math.floor(horas / 24);
-    return `hace ${dias} d`;
+    return `${dias} days ago`;
 }
 
 const CONFIG_TIPO = {
-    seguidor: { icono: UserPlus, texto: 'empezó a seguirte', color: 'text-blue-500' },
-    like_coche: { icono: Heart, texto: 'le ha dado like a tu coche', color: 'text-red-500' },
-    comentario_coche: { icono: MessageCircle, texto: 'comentó en tu coche', color: 'text-red-500' },
-    like_publicacion: { icono: Heart, texto: 'le ha dado like a tu publicación', color: 'text-red-500' },
-    comentario_publicacion: { icono: MessageCircle, texto: 'comentó en tu publicación', color: 'text-red-500' },
+    seguidor: { icono: UserPlus, texto: 'started following you', color: 'text-blue-500' },
+    like_coche: { icono: Heart, texto: 'liked your car', color: 'text-red-500' },
+    comentario_coche: { icono: MessageCircle, texto: 'commented on your car', color: 'text-red-500' },
+    like_publicacion: { icono: Heart, texto: 'liked your post', color: 'text-red-500' },
+    comentario_publicacion: { icono: MessageCircle, texto: 'commented on your post', color: 'text-red-500' },
 };
 
 function enlaceDeNotificacion(n) {
@@ -37,7 +37,7 @@ export default function Notifications() {
     useEffect(() => {
         api.get('/notificaciones')
             .then(res => setNotificaciones(res.data))
-            .catch(err => console.error('Error al cargar notificaciones:', err))
+            .catch(err => console.error('Error loading notifications:', err))
             .finally(() => setCargando(false));
 
         // Al entrar en esta página se dan todas por leídas (enfoque simple,
@@ -45,15 +45,15 @@ export default function Notifications() {
         api.post('/notificaciones/marcar-leidas').catch(() => {});
     }, []);
 
-    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Cargando...</div>;
+    if (cargando) return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white pt-24">Loading...</div>;
 
     return (
         <div className="min-h-screen bg-zinc-950 pt-24 pb-12 px-4">
             <div className="max-w-lg mx-auto">
-                <h1 className="text-3xl font-bold text-white tracking-tight mb-8">Notificaciones<span className="text-red-600">.</span></h1>
+                <h1 className="text-3xl font-bold text-white tracking-tight mb-8">Notifications<span className="text-red-600">.</span></h1>
 
                 {notificaciones.length === 0 ? (
-                    <div className="text-center py-24 text-zinc-600">Todavía no tienes notificaciones.</div>
+                    <div className="text-center py-24 text-zinc-600">You don't have any notifications yet.</div>
                 ) : (
                     <div className="space-y-2">
                         {notificaciones.map(n => {

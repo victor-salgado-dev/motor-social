@@ -19,7 +19,7 @@ export default function EditCar() {
                 const encontrado = res.data.garaje.find(c => String(c.id) === String(id));
                 if (encontrado) setCoche(encontrado);
                 else {
-                    mostrarToast("Coche no encontrado o no tienes permiso para editarlo", "error");
+                    mostrarToast("Car not found or you don't have permission to edit it", "error");
                     navigate('/garaje');
                 }
             })
@@ -30,7 +30,7 @@ export default function EditCar() {
             .finally(() => setCargando(false));
     }, [id, navigate]);
 
-    if (cargando) return <div className="min-h-screen pt-32 text-center text-white bg-zinc-950">Cargando...</div>;
+    if (cargando) return <div className="min-h-screen pt-32 text-center text-white bg-zinc-950">Loading...</div>;
     if (!coche) return null;
 
     return (

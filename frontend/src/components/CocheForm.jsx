@@ -47,9 +47,9 @@ export default function CocheForm({ coche = null, onGuardado }) {
                 : await api.post('/coches', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 
             onGuardado(res.data);
-            mostrarToast(esEdicion ? "Coche actualizado" : "Coche publicado", "exito");
+            mostrarToast(esEdicion ? "Car updated" : "Car published", "exito");
         } catch (err) {
-            mostrarToast(err.response?.data?.error || "Error al guardar el coche", "error");
+            mostrarToast(err.response?.data?.error || "Error saving car", "error");
         } finally {
             setEnviando(false);
         }
@@ -60,27 +60,27 @@ export default function CocheForm({ coche = null, onGuardado }) {
             <div className="flex items-center gap-3 mb-8">
                 <CarFront className="text-red-600" size={32} />
                 <h2 className="text-2xl font-bold text-white">
-                    {esEdicion ? <>Editar <span className="text-red-600">Coche</span></> : <>Añadir al <span className="text-red-600">Garaje</span></>}
+                    {esEdicion ? <>Edit <span className="text-red-600">Car</span></> : <>Add to <span className="text-red-600">Garage</span></>}
                 </h2>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
-                    {campo('marca', 'Marca', { required: true, placeholder: 'Ej. Porsche' })}
-                    {campo('modelo', 'Modelo', { required: true, placeholder: 'Ej. 911 GT3' })}
+                    {campo('marca', 'Make', { required: true, placeholder: 'e.g. Porsche' })}
+                    {campo('modelo', 'Model', { required: true, placeholder: 'e.g. 911 GT3' })}
                 </div>
                 <div className="grid grid-cols-3 gap-3">
-                    {campo('año', 'Año', { type: 'number', placeholder: '2023' })}
-                    {campo('potencia_cv', 'CV', { type: 'number', placeholder: '450' })}
-                    {campo('color', 'Color', { placeholder: 'Rojo' })}
+                    {campo('año', 'Year', { type: 'number', placeholder: '2023' })}
+                    {campo('potencia_cv', 'HP', { type: 'number', placeholder: '450' })}
+                    {campo('color', 'Color', { placeholder: 'Red' })}
                 </div>
-                {campo('kilometraje', 'Kilometraje (km)', { type: 'number', placeholder: '45000' })}
+                {campo('kilometraje', 'Mileage (km)', { type: 'number', placeholder: '45000' })}
                 <div>
-                    <label className="text-xs font-bold text-zinc-500 uppercase ml-1">Descripción</label>
+                    <label className="text-xs font-bold text-zinc-500 uppercase ml-1">Description</label>
                     <textarea
                         value={form.descripcion}
                         className="w-full bg-zinc-800 border-none rounded-xl p-4 text-white focus:ring-2 focus:ring-red-600 outline-none transition h-24 resize-none"
-                        placeholder="Detalles técnicos, historia, preparación..."
+                        placeholder="Technical details, history, modifications..."
                         onChange={e => setForm({ ...form, descripcion: e.target.value })}
                     />
                 </div>
@@ -88,11 +88,11 @@ export default function CocheForm({ coche = null, onGuardado }) {
                     <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={e => setFoto(e.target.files[0])} />
                     <Camera className="mx-auto mb-2 text-zinc-500" size={28} />
                     <p className="text-xs text-zinc-500">
-                        {foto ? foto.name : (esEdicion ? "Cambiar foto principal (opcional)" : "Subir fotografía (opcional)")}
+                        {foto ? foto.name : (esEdicion ? "Change main photo (optional)" : "Upload a photo (optional)")}
                     </p>
                 </div>
                 <button type="submit" disabled={enviando} className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl mt-4 flex items-center justify-center gap-2 transition">
-                    <Send size={18} /> {enviando ? "Guardando..." : (esEdicion ? "Guardar cambios" : "Publicar")}
+                    <Send size={18} /> {enviando ? "Saving..." : (esEdicion ? "Save changes" : "Publish")}
                 </button>
             </form>
         </div>
